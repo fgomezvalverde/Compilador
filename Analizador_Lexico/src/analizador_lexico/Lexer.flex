@@ -1,29 +1,132 @@
 package analizador_lexico;
-import static analizador_lexico.Token.*;
+import static Token.Token.*;
+import Token.Token;
 %%
 %class Lexer
 %type Token
-ALFA = [a-zA-Z_]
-NUM = [0-9]
-EXP_OCTAL=[0-8]
+%line
+%char
+%column
 
-NUM_OCTAL=”0″({EXP_OCTAL})+
+//GENERALES
+    TerminacionLinea = \r|\n|\r\n
+    Caracter = [^\r\n]
+    Espacio = {TerminacionLinea}|[\t\f]
 
-EXP_HEX=[0-9a-fA-F]
+    Bloque = "/*" [^*] ~"*/"
+    ComentarioLinea  = "//" {Caracter}*{TerminacionLinea}
 
-NUM_HEX=”0x”({EXP_HEX})+
+    Identificador = [:jletter:]|[:jletter:][:jletterdigit:]*
 
-WHITE=[ \t\r\n]
+//LITERALES
+    Entero = 0|[1-9][0-9]*
+    Decimal = Entero"."Entero
+    Cadenas = "\"" .+ "\""
+
+    Expresion_octal=[0-8]
+    Numero_octal=”0″({Expresion_octal})+
+
+    Expresion_hexa=[0-9a-fA-F]
+    Numero_hexa=”0x”({Expresion_hexa})+
+    
+    Literal = {Entero}|{Decimal}|{Cadenas}|{Expresion_octal}|{Numero_octal}|{Expresion_hexa}|{Numero_hexa};
+
 %{
-public String lexeme;
+public String lexeme;   
+public int linea;
 %}
 %%
-{WHITE} {/*Ignore*/}
-"=" {return ASSIGN;}
-"+" {return SUMA;}
-"*" {return MULT;}
-"-" {return RESTA;}
-"/" {return DIV;}
-{ALFA}({ALFA}|{NUM})* {lexeme=yytext(); return IDENTIFICADOR;}
- ("(-"{NUM}+")")|{NUM}+ {lexeme=yytext(); return INT;}
-. {return ERROR;}
+
+//IGNORAR
+{ComentarioLinea}   {}
+{Bloque}            {}
+[ \t\r\f\n]+        {}
+
+//ETIQUETAS
+"#"{Caracter}*{TerminacionLinea} {lexeme=yytext();linea = yyline; return ETIQUETA;}
+
+//PALABRAS RESERVADAS
+
+"auto"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"break"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"case"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"char"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"const"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"continue"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"default"   {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"do"        {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"double"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"else"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"enum"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"extern"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"float"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"for"       {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"goto"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"if"        {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"int"       {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"long"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"register"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"return"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"short"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"signed"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"sizeof"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"static"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"struct"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"switch"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"typedef"   {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"union"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"unsigned"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"void"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"volatile"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"while"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+
+//LITERALES
+{Literal} {lexeme=yytext();linea = yyline; return LITERAL;}
+
+// OPERADORES
+    //ARITMETICOS
+"++"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"-"        {lexeme=yytext();linea = yyline; return OPERADOR;} 
+"--"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"*"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"/"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"%"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"+="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"-="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"*="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"/="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"%="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+    //COMPARACION
+"<"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"<="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+">"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+">="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"!="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"=="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"!"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"&&"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"||"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"<<"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"<<="      {lexeme=yytext();linea = yyline; return OPERADOR;}
+">>"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"~"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"&"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"&="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"|"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"|="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"^"        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"^="       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"="        {lexeme=yytext();linea = yyline; return OPERADOR;}
+"->"       {lexeme=yytext();linea = yyline; return OPERADOR;}
+"!"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} // !a
+"~"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} // ~a
+"*"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} //*a
+"&"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} //&a
+{Identificador}"["({Literal}|{Identificador})"]"    {lexeme=yytext();linea = yyline; return OPERADOR;} //a[b]
+
+//IDENTIFICADOR
+{Identificador} {lexeme=yytext();linea = yyline; return IDENTIFICADOR;}
+
+//ERROR
+. {lexeme=yytext();linea = yyline;return ERROR;}
+

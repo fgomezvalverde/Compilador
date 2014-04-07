@@ -2,13 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package analizador_lexico;
+package Token;
 
 /**
  *
  * @author curso
  */
-public class identificador {
-        public String nombre;
-    public int ID;
+public enum Token {
+    IDENTIFICADOR,OPERADOR,PALABRA_RESERVADA,LITERAL,ETIQUETA, ERROR
 }
