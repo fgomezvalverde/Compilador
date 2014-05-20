@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 /**
@@ -32,5 +33,13 @@ public class Main {
                 new Principal().setVisible(true);
             }
         });
+
+        
+        
+        
+        
+        
+        //System.out.println(pru.substring(1, pru.length()-1));
+
     }
  }

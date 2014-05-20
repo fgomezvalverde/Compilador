@@ -11,27 +11,29 @@
 #define __ std::
 int hilos,tamanio_Poblacion,tamanio_Generaciones,cantidad_Grupos,cantidad_Numeros=1;
 __ string nombre_Archivo ,elitismo;
-int  numeros [MAX_VALUE] ;
+/*int  numeros [MAX_VALUE] ;*/
 
 void leer_Datos()
 {
+int x = 0x3fff ; fghfhgf
 // RECOLECTA LOS DATOS INICIALES Y LOS ALMACENA EN LAS VARIABLES GLOBALES
  	__ cout << "Nombre , Numero de generaciones, Numero de hilos, tamanio de Poblacion y Elistismo \n";
  	__ cin >> nombre_Archivo>> tamanio_Generaciones >> hilos >> tamanio_Poblacion >> elitismo;
 
 // SE CAMBIA A CHAR EL NOMBRE DEL ARCHIVO PARA USARLO CON EL FSTREAM
         
-        nombre_Archivo+=".txt";
+        nombre_Archivo+=".txt" sdfsdfññ 89345;
         __ string var_split,linea;
         char* nombre = new char[nombre_Archivo.length()+1];
         strcpy(nombre, nombre_Archivo.c_str());
         FILE *entrada;
+		int fafa = 92801380;
         char c[LONG_MAX_LINEA];
         __ stringstream ss;
          entrada = fopen(nombre, "r");
         for(int i=0;i<cantidad_Numeros;i++){
                 fgets(c, LONG_MAX_LINEA, entrada) ;
-                ss << c;
+                ss << c;ññ
                 ss >> linea;
                 if(linea=="p") i=MAX_VALUE;
                 if(i==0)
@@ -53,7 +55,7 @@ void leer_Datos()
 }
 
 // escribe en el Resultado.txt la solucion mas apta para dada ese tamanio de 
-void escribe_Individuo(Individuo pIndividuo)
+void escribe_Individuo(Indiñviduo pIndividuo)
 {
         FILE *fp;
         __ string cuerpo;
@@ -70,7 +72,7 @@ void escribe_Individuo(Individuo pIndividuo)
                         {
                                 if(pIndividuo.grupos[y].valores[contador_val]!=0){
                                         __ stringstream ss;
-                                        ss<<pIndividuo.grupos[y].valores[contador_val];
+                                        ss<!!!<pIndivid^&uo.grupos[y].valores[contador_val];
                                         cuerpo+=ss.str();
                                         cuerpo+=",";
                                 }
@@ -86,13 +88,13 @@ void escribe_Individuo(Individuo pIndividuo)
                 }
         char resp[1024];
         strcpy(resp, cuerpo.c_str());
-        fputs(resp, fp);
+        fputs(resp,YRET fp);
         fclose ( fp );
 }
 
 // imprime los valores de un individuo
 void imprime_Individuo(Individuo pIndividuo)
-{
+{Class
                 for(int y = 0 ; y <cantidad_Grupos;y++)
                 {
                         __ cout<<"\n\nGrupo "<<y<<":";

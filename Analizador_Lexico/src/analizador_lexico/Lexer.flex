@@ -14,60 +14,78 @@ import Token.Token;
     Espacio = {TerminacionLinea}|[\t\f]
 
     Bloque = "/*" [^*] ~"*/"
-    ComentarioLinea  = "//" {Caracter}*{TerminacionLinea}
+    ComentarioLinea  = "//"{Caracter}*{TerminacionLinea}
+    String = """{Caracter}*"""
 
     Identificador = [:jletter:]|[:jletter:][:jletterdigit:]*
+        //Identificador = {Alfa}{Alfa}{Literal}* 
 
 //LITERALES
-    Entero = 0|[1-9][0-9]*
-    Decimal = Entero"."Entero
-    Cadenas = "\"" .+ "\""
-
+    Cero = 0
     Expresion_octal=[0-8]
     Numero_octal=”0″({Expresion_octal})+
 
     Expresion_hexa=[0-9a-fA-F]
     Numero_hexa=”0x”({Expresion_hexa})+
     
-    Literal = {Entero}|{Decimal}|{Cadenas}|{Expresion_octal}|{Numero_octal}|{Expresion_hexa}|{Numero_hexa};
+    Entero = Cero|[0-9]*
+    Alfa = [a-zA-Z_]
+    Decimal = Entero"."Entero
+    Cadenas = "\"" .+ "\""
+
+
+    Literal = {Numero_octal}|{Numero_hexa}|{Decimal}|{Entero};
 
 %{
 public String lexeme;   
 public int linea;
 %}
 %%
+{Entero} {}
+{Cero}"x"({Expresion_hexa})+ {lexeme=yytext();linea = yyline; return LITERAL;}
+{Cero}({Expresion_octal})+ {lexeme=yytext();linea = yyline; return LITERAL;}
 
-//IGNORAR
-{ComentarioLinea}   {}
-{Bloque}            {}
+//COMENTARIOS
+{ComentarioLinea}   {lexeme=yytext();linea = yyline; return COMENTARIO;}
+{Bloque}            {lexeme=yytext();linea = yyline; return COMENTARIO;}
+{Cadenas}           {lexeme=yytext();linea = yyline; return COMENTARIO;}
 [ \t\r\f\n]+        {}
+
 
 //ETIQUETAS
 "#"{Caracter}*{TerminacionLinea} {lexeme=yytext();linea = yyline; return ETIQUETA;}
+
+//CORCHETES Y PARENTESIS
+"("         {lexeme=yytext();linea = yyline; return OTRO;}
+")"         {lexeme=yytext();linea = yyline; return OTRO;}
+"{"         {lexeme=yytext();linea = yyline; return OTRO;}
+"}"         {lexeme=yytext();linea = yyline; return OTRO;}
+";"         {lexeme=yytext();linea = yyline; return OTRO;}
+","         {lexeme=yytext();linea = yyline; return OTRO;}
 
 //PALABRAS RESERVADAS
 
 "auto"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "break"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "case"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"char"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"char""*"*      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "const"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "continue"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "default"   {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "do"        {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"double"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"double""*"*    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "else"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "enum"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "extern"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"float"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"float""*"*     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "for"       {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "goto"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "if"        {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"int"       {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"long"      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"int""*"*       {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"long""*"*      {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "register"  {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "return"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
-"short"     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
+"short""*"*     {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "signed"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "sizeof"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
 "static"    {lexeme=yytext();linea = yyline; return PALABRA_RESERVADA;}
@@ -118,15 +136,23 @@ public int linea;
 "^="       {lexeme=yytext();linea = yyline; return OPERADOR;}
 "="        {lexeme=yytext();linea = yyline; return OPERADOR;}
 "->"       {lexeme=yytext();linea = yyline; return OPERADOR;}
-"!"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} // !a
-"~"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} // ~a
-"*"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} //*a
-"&"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return OPERADOR;} //&a
-{Identificador}"["({Literal}|{Identificador})"]"    {lexeme=yytext();linea = yyline; return OPERADOR;} //a[b]
-
+"!"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return IDENTIFICADOR;} // !a
+"~"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return IDENTIFICADOR;} // ~a
+"*"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return IDENTIFICADOR;} //*a
+"&"({Literal}|{Identificador})                      {lexeme=yytext();linea = yyline; return IDENTIFICADOR;} //&a
+"."({Literal}|{Identificador})("["{Identificador}"]")*                      {lexeme=yytext();linea = yyline; return IDENTIFICADOR;}
+"["{Caracter}*"]"    {lexeme=yytext();linea = yyline; return IDENTIFICADOR;} //a[b]
+"("{Caracter}*")" {}
 //IDENTIFICADOR
 {Identificador} {lexeme=yytext();linea = yyline; return IDENTIFICADOR;}
 
+//REGLAS
+
+
+
 //ERROR
 . {lexeme=yytext();linea = yyline;return ERROR;}
+
+
+
 
