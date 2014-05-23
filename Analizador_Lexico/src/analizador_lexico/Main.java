@@ -4,17 +4,16 @@
  */
 package analizador_lexico;
 
-import Token.Token;
-import static Token.Token.*;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java_cup.runtime.Symbol;
+
+
 /**
  *
  * @author curso
@@ -24,22 +23,26 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        File file=new File("C://Users/Fabian//Documents/GitHub/Compilador/Analizador_Lexico/src/analizador_lexico/Lexer.flex");
+    public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
+        File file=new File("src/analizador_lexico/Lexer.flex");
         JFlex.Main.generate(file);
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Principal().setVisible(true);
-            }
-        });
-
+        String[] argumentos = {"-interface", "-destdir", "src", 
+                "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
+        java_cup.Main.main(argumentos);
         
+        /*Reader reader = null ;
+        reader = new BufferedReader(new FileReader("fichero.txt"));
+        Scanner lexer = new Scanner (reader);*/
         
-        
-        
-        
-        //System.out.println(pru.substring(1, pru.length()-1));
+        /*while(true )
+        {
+            System.out.println(lexer.next_token()+"");
+            
+        }*/
+        //mjavac parse = new mjavac(lexer);
+        //parse.parse();
+       
 
     }
  }
