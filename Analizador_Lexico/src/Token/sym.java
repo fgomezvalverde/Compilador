@@ -78,8 +78,8 @@ public interface sym {
   public static final int HEX_LITERAL = 58;
   public static final int OCT_LITERAL = 59;
   
-  public static final int LONG_LITERAL = 60;
-  public static final int SHORT_LITERAL = 61;
+  public static final int LONG = 60;
+  public static final int SHORT = 61;
   
   
   public static final int BREAK = 62;
@@ -92,6 +92,7 @@ public interface sym {
   public static final int READ = 69;
   public static final int WRITE = 70;
   public static final int ETIQUETA = 71;
+  public static final int CONST = 72;
 
           
    

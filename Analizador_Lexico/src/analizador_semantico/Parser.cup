@@ -143,33 +143,76 @@ terminal java.lang.Number FLOATING_POINT_LITERAL;
 terminal java.lang.Boolean BOOLEAN_LITERAL;
 terminal java.lang.Character CHARACTER_LITERAL;
 terminal java.lang.String STRING_LITERAL;
-terminal java.lang.Short SHORT_LITERAL;
-terminal java.lang.Long LONG_LITERAL;
 
 terminal HEX_LITERAL;
 terminal OCT_LITERAL;
 terminal NULL_LITERAL;
 
 
-
+// INICIO
 non terminal estructura;
+
+// ESTRUCTURA
 non terminal statement_globales;
 non terminal statement_funciones;
 
+// LITERALES
+non terminal literal;
+
+// TIPOS
+non terminal type;
+non terminal primitive_type;
+non terminal numeric_type;
+
+
+
+// VACIO
 non terminal epsilon;
 
 
 // GRAMATICA
 start with estructura;
-estructura ::= NULL_LITERAL;
-/*
+
 estructura ::= 
             statement_globales
         |   statement_funciones;
 
+// LITERALES *************************
+
+literal ::=
+		INTEGER_LITERAL 
+	|	FLOATING_POINT_LITERAL
+	|	BOOLEAN_LITERAL 
+	|	CHARACTER_LITERAL 
+	|	STRING_LITERAL 
+        |       HEX_LITERAL
+        |       OCT_LITERAL
+	|	NULL_LITERAL;
+
+
+// TIPOS *****************
+type	::=
+		primitive_type
+	|	IDENTIFIER;
+primitive_type ::=
+		numeric_type
+	|	BOOLEAN;
+numeric_type ::= 
+		INT
+	|	CHAR
+	|	FLOAT
+        |       LONG
+        |       SHORT;
+
+// EXPRESIONES **************
+
+
+// PARTE 1*****
 statement_globales ::= ;
 
+// PARTE 2******
 statement_funciones ::= ;
 
-*/
-//epsilon ::= /*nothing */;
+
+// ********** VACIO
+epsilon ::= /*nothing */;

@@ -125,8 +125,8 @@ SingleCharacter = [^\r\n\'\\]
   "float"                        { return symbol(FLOAT); }
 
 //AGREAGADAS 
-  "long"                        { return symbol(LONG_LITERAL); }                            
-  "short"                        { return symbol(SHORT_LITERAL); }
+  "long"                        { return symbol(LONG); }                            
+  "short"                        { return symbol(SHORT); }
   "break"                        { return symbol(BREAK); }                            
   "case"                        { return symbol(CASE); }
   "continue"                        { return symbol(CONTINUE); }                            
@@ -136,6 +136,7 @@ SingleCharacter = [^\r\n\'\\]
   "switch"                        { return symbol(SWITCH); }                            
   "read"                        { return symbol(READ); }                            
   "write"                        { return symbol(WRITE); }
+  "const"                       {return symbol(CONST);}
 
   /* boolean literals */
   "true"                         { return symbol(BOOLEAN_LITERAL, new Boolean(true)); }
