@@ -70,7 +70,7 @@ action code {:
 
 :};
 
-
+// PALABRAS RESERVADAS
   terminal BOOLEAN ;//"boolean"                     
   terminal CHAR; //"char"                       
   terminal ELSE; //"else"                         
@@ -92,6 +92,20 @@ action code {:
   terminal SWITCH; //"switch"                                              
   terminal READ; //"read"                                                
   terminal WRITE; //"write"                        
+
+  terminal UNSIGNED ;
+  terminal AUTO;
+  terminal STATIC;
+  terminal ENUM;
+  terminal EXTERN;
+  terminal GOTO;
+  terminal REGISTER;
+  terminal SIGNED;
+  terminal SIZEOF;
+  terminal STRUCT;
+  terminal TYPEDEF;
+  terminal VOLATILE;
+  terminal MAIN;
 
   // SEPARADORES
 
@@ -117,7 +131,18 @@ action code {:
   terminal PLUS_EQ; //"+="                            
   terminal MINUS_EQ; //"-="                            
   terminal MULT_EQ; //"*="                            
-  terminal DIV_EQ; // "/="    
+  terminal DIV_EQ; // "/=" 
+   
+terminal GT_GT;//">>"                     
+terminal LT_LT;//"<<"                     
+terminal TOS;//"~"                      
+terminal MOD_EQ;//"%="                     
+terminal AT_EQ;//"&="                     
+terminal UP_EQ;//"^="                     
+terminal OR_EQ;//"|="                     
+terminal LT_LT_EQ;//"<<="                    
+terminal GT_GT_EQ;//">>="                    
+terminal POINTER;//"->"                     
     
   terminal LPAREN; // "("                            
   terminal RPAREN; //")"                            
@@ -175,7 +200,8 @@ start with estructura;
 
 estructura ::= 
             statement_globales
-        |   statement_funciones;
+        |   statement_funciones
+        |   epsilon;
 
 // LITERALES *************************
 
@@ -207,12 +233,13 @@ numeric_type ::=
 // EXPRESIONES **************
 
 
-// PARTE 1*****
-statement_globales ::= ;
+/*
+// PARTE DE GLOBALES
+statement_globales ::= literal;
 
-// PARTE 2******
-statement_funciones ::= ;
-
+// PARTE DE FUNCIONES
+statement_funciones ::= literal;
+*/
 
 // ********** VACIO
 epsilon ::= /*nothing */;

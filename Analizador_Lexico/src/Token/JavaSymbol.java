@@ -38,7 +38,7 @@ public class JavaSymbol extends java_cup.runtime.Symbol {
     return text;
   }
 
-  private String getTokenName(int token) {
+  public static String getTokenName(int token) {
     try {
       java.lang.reflect.Field [] classFields = sym.class.getFields();
       for (int i = 0; i < classFields.length; i++) {

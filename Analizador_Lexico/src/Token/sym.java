@@ -94,6 +94,34 @@ public interface sym {
   public static final int ETIQUETA = 71;
   public static final int CONST = 72;
 
+  public static final int UNSIGNED = 73;
+  public static final int AUTO = 74;
+  public static final int STATIC = 75;
+  public static final int ENUM = 76;
+  public static final int EXTERN = 77;
+  public static final int GOTO = 78;
+  public static final int REGISTER = 79;
+  public static final int SIGNED = 80;
+  public static final int SIZEOF = 81;
+  public static final int STRUCT = 82;
+  public static final int TYPEDEF = 83;
+  public static final int VOLATILE= 84;
+  public static final int MAIN= 85;
+  
+  public static final int UP = 86;
+  public static final int GT_GT = 87;
+  public static final int LT_LT = 88;
+  public static final int TOS = 89;
+  public static final int MOD_EQ = 90;
+  public static final int AT_EQ = 91;
+  public static final int UP_EQ = 92;
+  public static final int OR_EQ = 93;
+  public static final int LT_LT_EQ = 94;
+  public static final int GT_GT_EQ = 95;
+  public static final int POINTER = 96;
+  
+  public static final int ERROR = 97;
+  
           
    
 }

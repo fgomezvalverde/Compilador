@@ -5,12 +5,15 @@
 package analizador_lexico;
 
 
+import Token.JavaSymbol;
+import static Token.sym.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java_cup.runtime.Symbol;
 
 
@@ -22,15 +25,21 @@ public class Main {
 
     /**
      * @param args the command line arguments
+     * @throws java.io.FileNotFoundException
      */
     public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
         File file=new File("src/analizador_lexico/Lexer.flex");
         JFlex.Main.generate(file);
-
+        
         String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);
         
+        /*
+        Main m = new Main();
+        m.runScanner("fichero.txt");*/
+        
+        ///////
         /*Reader reader = null ;
         reader = new BufferedReader(new FileReader("fichero.txt"));
         Scanner lexer = new Scanner (reader);*/
@@ -45,4 +54,49 @@ public class Main {
        
 
     }
+    
+    
+        private Token token;
+    private Symbol tipoToken;
+
+    private ArrayList<String> lexemas;
+    private ArrayList<Token> tokens;
+
+    public void runScanner(String file) throws FileNotFoundException, IOException {
+        Scanner lexer = new Scanner(new FileReader(file));
+
+        lexemas = new ArrayList();
+        tokens = new ArrayList();
+
+        while ((tipoToken =  lexer.next_token()).sym != EOF) {
+            if(tipoToken.sym == ERROR){
+            System.out.print("\n");
+            System.out.println("ERROR LÉXICO: " + lexer.current_lexeme());
+            System.out.print("\n");
+                    tipoToken = lexer.next_token();}
+
+            token = new Token(tipoToken);
+
+            if (lexemas.contains(lexer.yytext())) {
+               int i = lexemas.indexOf(lexer.yytext());
+               tokens.get(i).getLineas().add(lexer.getLine() + "");
+            }
+            else{
+                lexemas.add(lexer.yytext());
+                token.getLineas().add(lexer.getLine() + "");
+                tokens.add(token);
+            }
+           
+        }
+        
+        System.out.println("********************  TABLA DE TOKENS ********************");
+        for(int cont=0;cont < tokens.size(); cont++)
+        {
+            Token token1 = tokens.get(cont);
+            System.out.println(token1.getLexema() + "  ----  " + token1.getTipoToken() + "  ----  " + token1.printLines());
+        }
+
+    }
+    
+    
  }

@@ -34,11 +34,6 @@ import Token.*;
     return " (line: "+l+" , column: "+c+" , lexeme: '"+yytext()+"')";
   }
 
-  /** 
-   * assumes correct representation of a long value for 
-   * specified radix in scanner buffer from <code>start</code> 
-   * to <code>end</code> 
-   */
   private long parseLong(int start, int end, int radix) {
     long result = 0;
     long digit;
@@ -51,6 +46,9 @@ import Token.*;
 
     return result;
   }
+public int getLine(){return yyline;}
+
+public int getColumn(){return yycolumn;}
 %}
 
 /* main character classes */
@@ -82,12 +80,13 @@ FLit3    = [0-9]+
 Exponent = [eE] [+-]? [0-9]+
 
 /* HEX AND OCT */
-Cero = 0
-Expresion_octal = [0-8]
-Numero_octal    = ”0″({Expresion_octal})+
+HexIntegerLiteral = 0 [xX] 0* {HexDigit} {1,8}
+HexLongLiteral    = 0 [xX] 0* {HexDigit} {1,16} [lL]
+HexDigit          = [0-9a-fA-F]
 
-Expresion_hexa  = [0-9a-fA-F]
-Numero_hexa     = ”0x”({Expresion_hexa})+
+OctIntegerLiteral = 0+ [1-3]? {OctDigit} {1,15}
+OctLongLiteral    = 0+ 1? {OctDigit} {1,21} [lL]
+OctDigit          = [0-7]
 
 
 
@@ -110,18 +109,13 @@ SingleCharacter = [^\r\n\'\\]
   /* keywords */
   "boolean"                      { return symbol(BOOLEAN); }
   "char"                         { return symbol(CHAR); }
-
   "else"                         { return symbol(ELSE); }
-
   "int"                          { return symbol(INT); }
-
   "if"                           { return symbol(IF); }
   "public"                       { return symbol(PUBLIC); }
-
   "return"                       { return symbol(RETURN); }
   "void"                         { return symbol(VOID); }
   "while"                        { return symbol(WHILE); }
-
   "float"                        { return symbol(FLOAT); }
 
 //AGREAGADAS 
@@ -137,6 +131,21 @@ SingleCharacter = [^\r\n\'\\]
   "read"                        { return symbol(READ); }                            
   "write"                        { return symbol(WRITE); }
   "const"                       {return symbol(CONST);}
+
+"unsigned"               {return symbol(UNSIGNED);}
+"auto"                   {return symbol(AUTO);}
+"static"                 {return symbol(STATIC);}
+"enum"      		 {return symbol(ENUM);}
+"extern"      		 {return symbol(EXTERN);}
+"goto"      		 {return symbol(GOTO);}
+"register"               {return symbol(REGISTER);}
+"signed"      		 {return symbol(SIGNED);}
+"sizeof"      		 {return symbol(SIZEOF);}
+"struct"      		 {return symbol(STRUCT);}
+"typedef"      		 {return symbol(TYPEDEF);}
+"volatile"               {return symbol(VOLATILE);}
+"main"			 {return symbol(MAIN);}
+
 
   /* boolean literals */
   "true"                         { return symbol(BOOLEAN_LITERAL, new Boolean(true)); }
@@ -176,6 +185,7 @@ SingleCharacter = [^\r\n\'\\]
   "*"                            { return symbol(MULT); }
   "/"                            { return symbol(DIV); }
   "%"                            { return symbol(MOD); }
+  "^"                           {return symbol(UP);}
 
   "++"                            { return symbol(PLUS_PLUS); }
   "--"                            { return symbol(MINUS_MINUS); }
@@ -185,6 +195,18 @@ SingleCharacter = [^\r\n\'\\]
   "*="                            { return symbol(MULT_EQ); }
   "/="                            { return symbol(DIV_EQ); }
   
+    //AGREGADAS DEL ADRIAN
+">>"                     { return symbol(GT_GT); }
+"<<"                     { return symbol(LT_LT); }
+"~"                      { return symbol(TOS); }
+"%="                     { return symbol(MOD_EQ); }
+"&="                     { return symbol(AT_EQ); }
+"^="                     { return symbol(UP_EQ); }
+"|="                     { return symbol(OR_EQ); }
+"<<="                    { return symbol(LT_LT_EQ); }
+">>="                    { return symbol(GT_GT_EQ); }
+"->"                     { return symbol(POINTER); }
+
   /* string literal */
   \"                             { yybegin(STRING); string.setLength(0); }
 
@@ -192,9 +214,12 @@ SingleCharacter = [^\r\n\'\\]
   \'                             { yybegin(CHARLITERAL); }
 
   /* numeric literals */
+// HEX AND OCT ** MODIFICADAS DE ADRIAN
+    {HexLongLiteral}             { return symbol(HEX_LITERAL, new Integer(yytext())); }
+    {HexDigit}                   { return symbol(HEX_LITERAL, new Integer(yytext())); } 
 
-  {Numero_hexa}                  { return symbol(HEX_LITERAL, new Integer(yytext())); }
-  {Numero_octal}                  { return symbol(OCT_LITERAL, new Integer(yytext())); } 
+    {OctLongLiteral}            { return symbol(OCT_LITERAL, new Integer(yytext())); } 
+    {OctDigit}                  { return symbol(OCT_LITERAL, new Integer(yytext())); } 
 
   {DecIntegerLiteral}            { return symbol(INTEGER_LITERAL, new Integer(yytext())); }
 
@@ -252,5 +277,5 @@ SingleCharacter = [^\r\n\'\\]
 
 /* error fallback */
 
-.|\n                             { return symbol(ILLEGAL_CHARACTER, yytext());}
-<<EOF>>                          { return symbol(EOF); }
+.|\n                             { return symbol(ERROR, yytext());}
+//<<EOF>>                          { return symbol(EOF); }
