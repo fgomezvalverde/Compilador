@@ -297,7 +297,7 @@ cuerpo_funcion_aux          ::=
                 estructura_read cuerpo_funcion_aux
         |       estructura_write cuerpo_funcion_aux
         |       llamado_funcion cuerpo_funcion_aux
-        |      EXTERN SEMICOLON cuerpo_funcion_aux
+        |       expresiones SEMICOLON cuerpo_funcion_aux
         |       statement_if cuerpo_funcion_aux
         |       statement_while cuerpo_funcion_aux
         |       statement_for cuerpo_funcion_aux
