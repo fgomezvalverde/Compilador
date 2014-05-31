@@ -1,3 +1,5 @@
+
+
 import java_cup.runtime.*;
 import java.io.*;
 import java.util.*;
@@ -6,21 +8,20 @@ import java.util.*;
 
 
 parser code  {: 
-
-  public static analizador_lexico.Scanner s;
   public static int errors = 0;
   public static int warnings = 0;
+  public static analizador_lexico.Scanner s;
   
+
+
   public static void main(String argv[]) {
 
     for (int i = 0; i < argv.length; i++) {
       try {
-        
-        System.out.println("\n...Creating Symbol-Table for ["+argv[i]+"]...\n");
 	  s = new analizador_lexico.Scanner(new FileReader(argv[i]));
         Parser p = new Parser(s);
         p.parse();
-
+        System.out.println("Number of errors = " + errors + ".");
        
 
       }
@@ -30,8 +31,10 @@ parser code  {:
       }
     }
   }
-
-
+    protected int error_sync_size () {
+        System.out.println(":error_sync_size was called.");
+        return 1; // not recommended by the CUP manual
+}
   public void report_error(String message, Object info) {
     if (info instanceof String){
 	errors++; 
@@ -46,23 +49,13 @@ parser code  {:
     	System.err.println(m);
     }
   }
-
-  public void sem_error(String lexeme, String message) {
-	errors++;
-     	System.err.println("Error "+ s.current_lexeme() + " : Semantic error");
-      System.err.println("  "+ errors + "==> " + message + ": "+ lexeme + "\n");
-  }
-
-  public void warning(String lexeme, String message) {
-	warnings++;
-     	System.err.println("Warning "+ s.current_lexeme());
-      System.err.println("  "+ warnings + "==> " + message + ": "+ lexeme + "\n");
-  } 
-  
+   
   public void report_fatal_error(String message, Object info) {
-    	report_error(message, info);
-    	throw new RuntimeException("Fatal Syntax Error");
+    report_error(message, info);
+    throw new RuntimeException("Fatal Syntax Error");
   }
+
+
 :};
 
 action code {:
@@ -173,35 +166,230 @@ terminal HEX_LITERAL;
 terminal OCT_LITERAL;
 terminal NULL_LITERAL;
 
-
 // INICIO
-non terminal estructura;
+non terminal String estructura;
 
 // ESTRUCTURA
-non terminal statement_globales;
-non terminal statement_funciones;
+non terminal String statement_globales;
+non terminal String statement_funciones;
+non terminal String cuerpo_funcion;
+non terminal String cuerpo_funcion_aux;
+non terminal String llamado_funcion;
+non terminal String statement_variables_locales_inicio;
+non terminal String statement_variables_locales;
+
+    // IF-ELSE -FOR -WHILE
+non terminal String statement_if;
+non terminal String statement_while;
+non terminal String statement_for;    
+
+    // SWITCH
+non terminal String statement_switch ;
+non terminal String statement_switch_aux;
+non terminal String statement_cuerpo_case;
+
+    // CONTINUE - BREAK - RETURN
+non terminal String otras_palabras;
+non terminal String return_variables;
+
+// DECLARACIONES
+non terminal String declaracion_identificador;
+non terminal String varios_identificadores;
+non terminal String valor_inicial;
+
+non terminal String declaracion_funciones;
+non terminal String varios_tipos;
 
 // LITERALES
-non terminal literal;
+non terminal String literal;
+
 
 // TIPOS
-non terminal type;
-non terminal primitive_type;
-non terminal numeric_type;
+non terminal String type;
 
+// EXPRESIONES
+non terminal String expresiones;
+non terminal String asignacion;
+non terminal String expresion_aritmetica;
+non terminal String expresion_aritmetica_unaria;
+non terminal String expresion_aritmetica_binaria;
+non terminal String expresion_booleana;
 
+// OPERADORES
+non terminal String operadores_unarios;
+non terminal String operadores_binarios;
+non terminal String operadores_asignacion;
+non terminal String operadores_booleanos;
+
+// READ AND WRITE
+non terminal String estructura_read;
+non terminal String estructura_read_parametros;
+
+non terminal String estructura_write;
+non terminal String estructura_write_parametros;
+non terminal String estructura_write_parametros_aux;
+
+// ERROR ****
+non terminal String error_semicolon;
+non terminal String error_corchete;
 
 // VACIO
-non terminal epsilon;
+non terminal String epsilon;
 
+
+
+/* Precedences */
+precedence left PLUS, MINUS;
+precedence left MULT, DIV, MOD;
+precedence left NOT,PLUS_PLUS,MINUS_MINUS;
 
 // GRAMATICA
 start with estructura;
 
 estructura ::= 
-            statement_globales
-        |   statement_funciones
-        |   epsilon;
+            statement_globales;            
+
+
+// PARTE DE GLOBALES
+statement_globales ::= 
+                declaracion_identificador statement_globales
+        |       declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
+
+// DECLARACION VARIABLES *******************
+declaracion_identificador ::=
+                type IDENTIFIER varios_identificadores valor_inicial SEMICOLON 
+        |       type error{:System.out.println("Error Semantico: Declaracion Identificador");:} SEMICOLON ;
+
+varios_identificadores    ::=
+                COMMA IDENTIFIER varios_identificadores
+        |       epsilon;
+
+valor_inicial             ::=
+                EQ literal
+        |       epsilon;
+
+// PARTE DE FUNCIONES 
+statement_funciones  ::=
+                declaracion_funciones statement_funciones
+        |       epsilon;
+                
+
+declaracion_funciones ::=
+                type IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
+        |       type IDENTIFIER LPAREN RPAREN cuerpo_funcion
+        |       VOID IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
+        |       VOID IDENTIFIER LPAREN RPAREN cuerpo_funcion; 
+
+varios_tipos            ::=
+                COMMA type IDENTIFIER varios_tipos
+        |       epsilon;
+
+// CUERPO DE LA FUNCION
+cuerpo_funcion          ::=
+                LBRACE
+                
+                statement_variables_locales_inicio
+                cuerpo_funcion_aux            //*********************** PROBLEMA AQUI
+                
+                ;
+
+cuerpo_funcion_aux          ::=
+                estructura_read cuerpo_funcion_aux
+        |       estructura_write cuerpo_funcion_aux
+        |       llamado_funcion cuerpo_funcion_aux
+        |      EXTERN SEMICOLON cuerpo_funcion_aux
+        |       statement_if cuerpo_funcion_aux
+        |       statement_while cuerpo_funcion_aux
+        |       statement_for cuerpo_funcion_aux
+        |       statement_switch cuerpo_funcion_aux
+        |       otras_palabras   cuerpo_funcion_aux
+        |       RBRACE;     // SE TERMINA LA FUNCION    
+
+
+// IF_ELSE **************
+
+statement_if ::=
+                IF LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ELSE LBRACE cuerpo_funcion_aux
+        |       IF LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ;
+
+// WHILE
+
+statement_while ::=
+                WHILE LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ;
+
+// FOR
+
+statement_for   ::=
+                FOR LPAREN expresiones SEMICOLON expresiones SEMICOLON expresiones RPAREN LBRACE cuerpo_funcion_aux;
+
+// SWITCH *****************
+
+statement_switch    ::=
+                SWITCH LPAREN expresiones RPAREN LBRACE statement_switch_aux RBRACE;
+
+statement_switch_aux     ::=
+        |        CASE INTEGER_LITERAL COLON statement_cuerpo_case statement_switch_aux
+        |       DEFAULT COLON statement_cuerpo_case statement_switch_aux;
+
+statement_cuerpo_case         ::=
+                estructura_read statement_cuerpo_case
+        |       estructura_write statement_cuerpo_case
+        |       llamado_funcion statement_cuerpo_case
+        |       expresiones statement_cuerpo_case
+        |       BREAK SEMICOLON;     // SE TERMINA LA FUNCION  
+
+// CONTINUES, BREAK AND RETURN
+
+otras_palabras  ::=
+                CONTINUE SEMICOLON
+        |       BREAK   SEMICOLON
+        |       RETURN return_variables  SEMICOLON;
+
+return_variables    ::=
+                    
+        |       literal
+        |       IDENTIFIER;
+
+// VARIABLES LOCALES DE FUNCION ******************
+statement_variables_locales_inicio ::=
+        |       epsilon
+                statement_variables_locales;
+
+statement_variables_locales ::=
+                declaracion_identificador 
+        |       declaracion_identificador statement_variables_locales;  
+
+// OPERADPRES *********************
+
+operadores_unarios ::=
+                PLUS_PLUS
+        |       MINUS_MINUS;
+
+
+operadores_binarios ::=
+                PLUS
+        |       MINUS
+        |       MULT
+        |       DIV
+        |       MOD;
+
+operadores_asignacion ::= 
+                EQ
+        |       PLUS_EQ
+        |       MINUS_EQ
+        |       MULT_EQ
+        |       DIV_EQ;   
+
+
+operadores_booleanos ::= 
+                OROR
+        |       ANDAND
+        |       EQEQ
+        |       GTEQ
+        |       GT
+        |       LTEQ
+        |       LT
+        |       NOTEQ;   
 
 // LITERALES *************************
 
@@ -216,30 +404,166 @@ literal ::=
 	|	NULL_LITERAL;
 
 
+
 // TIPOS *****************
 type	::=
-		primitive_type
-	|	IDENTIFIER;
-primitive_type ::=
-		numeric_type
-	|	BOOLEAN;
-numeric_type ::= 
-		INT
+		BOOLEAN
+	|	INT
 	|	CHAR
 	|	FLOAT
         |       LONG
         |       SHORT;
 
-// EXPRESIONES **************
 
 
-/*
-// PARTE DE GLOBALES
-statement_globales ::= literal;
 
-// PARTE DE FUNCIONES
-statement_funciones ::= literal;
-*/
+// READ AND WRITE **************
+
+estructura_read    ::=
+                READ LPAREN  RPAREN SEMICOLON
+        |       READ LPAREN  estructura_read_parametros RPAREN SEMICOLON;
+
+estructura_read_parametros  ::=
+               literal;
+
+estructura_write   ::=
+                WRITE LPAREN  estructura_write_parametros RPAREN SEMICOLON;
+                
+estructura_write_parametros   ::=
+                estructura_write_parametros_aux
+        |       estructura_write_parametros_aux COMMA estructura_write_parametros;       
+
+estructura_write_parametros_aux   ::=
+                expresiones
+        |       IDENTIFIER
+        |       literal;
+
+// LLAMADO A FUNCION ********
+llamado_funcion             ::=
+                IDENTIFIER LPAREN  RPAREN SEMICOLON
+        |       IDENTIFIER LPAREN  estructura_write_parametros RPAREN SEMICOLON;
+               
+
+//      EXPRESIONES
+expresiones   ::=
+                asignacion 
+        |       expresion_aritmetica 
+        |       expresion_booleana;
+ 
+
+asignacion ::= 
+                IDENTIFIER operadores_asignacion literal ;      
+
+
+expresion_aritmetica ::= 
+                 expresion_aritmetica_unaria
+        |        expresion_aritmetica_binaria
+        |        LPAREN expresion_aritmetica RPAREN
+        |        IDENTIFIER 
+        |        literal;
+
+expresion_aritmetica_unaria ::= 
+                 operadores_unarios IDENTIFIER 
+        |        IDENTIFIER operadores_unarios ;
+
+expresion_aritmetica_binaria ::= 
+                 expresion_aritmetica operadores_binarios expresion_aritmetica;
+        
+
+expresion_booleana ::= 
+          |         expresion_aritmetica operadores_booleanos expresion_aritmetica
+          |         LPAREN expresion_booleana RPAREN;
+
+
+error_semicolon ::=
+                SEMICOLON
+        |       MINUS_MINUS error_semicolon
+        |       AT error_semicolon
+        |       SHORT error_semicolon
+        |       SIGNED error_semicolon
+        |       GT error_semicolon
+        |       POINTER error_semicolon
+        |       PLUS_EQ error_semicolon
+        |       NOTEQ error_semicolon
+        |       TOS error_semicolon
+        |       LT_LT error_semicolon
+        |       REGISTER error_semicolon
+        |       ENUM error_semicolon
+        |       RBRACK error_semicolon
+        |       SIZEOF error_semicolon
+        |       COMMA error_semicolon
+        |       RBRACE error_semicolon
+        |       GT_GT_EQ error_semicolon
+        |       RPAREN error_semicolon
+        |       LBRACK error_semicolon
+        |       LT error_semicolon
+        |       ANDAND error_semicolon
+        |       OROR error_semicolon
+        |       STRUCT error_semicolon
+        |       LBRACE error_semicolon
+        |       MOD_EQ error_semicolon
+        |       LPAREN error_semicolon
+        |       INTEGER_LITERAL error_semicolon
+        |       NOT error_semicolon
+        |       FLOAT error_semicolon
+        |       GOTO error_semicolon
+        |       PLUS_PLUS error_semicolon
+        |       AT_EQ error_semicolon
+        |       EQ error_semicolon
+        |       BOOLEAN_LITERAL error_semicolon
+        |       MOD error_semicolon
+        |       UP_EQ error_semicolon
+        |       LONG error_semicolon
+        |       PLUS error_semicolon
+        |       QUESTION error_semicolon
+        |       WHILE error_semicolon
+        |       CHAR error_semicolon
+        |       BOOLEAN error_semicolon
+        |       SWITCH error_semicolon
+        |       DO error_semicolon
+        |       FOR error_semicolon
+        |       VOID error_semicolon
+        |       EXTERN error_semicolon
+        |       DIV error_semicolon
+        |       DIV_EQ error_semicolon
+        |       PUBLIC error_semicolon
+        |       RETURN error_semicolon
+        |       MULT error_semicolon
+        |       ELSE error_semicolon
+        |       GTEQ error_semicolon
+        |       BREAK error_semicolon
+        |       LT_LT_EQ error_semicolon
+        |       DOT error_semicolon
+        |       INT error_semicolon
+        |       NULL_LITERAL error_semicolon
+        |       OCT_LITERAL error_semicolon
+        |       STRING_LITERAL error_semicolon
+        |       EQEQ error_semicolon
+        |       OR_EQ error_semicolon
+        |       DEFAULT error_semicolon
+        |       MINUS_EQ error_semicolon
+        |       MAIN error_semicolon
+        |       MINUS error_semicolon
+        |       LTEQ error_semicolon
+        |       CONTINUE error_semicolon
+        |       IF error_semicolon
+        |       UNSIGNED error_semicolon
+        |       COLON error_semicolon
+        |       HEX_LITERAL error_semicolon
+        |       CHARACTER_LITERAL error_semicolon
+        |       MULT_EQ error_semicolon
+        |       GT_GT error_semicolon
+        |       VOLATILE error_semicolon
+        |       CASE error_semicolon
+        |       STATIC error_semicolon
+        |       TYPEDEF error_semicolon
+        |       AUTO error_semicolon
+        |       FLOATING_POINT_LITERAL error_semicolon;
+
+
 
 // ********** VACIO
 epsilon ::= /*nothing */;
+        
+
+

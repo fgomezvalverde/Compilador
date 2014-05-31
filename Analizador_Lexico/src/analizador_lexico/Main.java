@@ -5,16 +5,17 @@
 package analizador_lexico;
 
 
-import Token.JavaSymbol;
-import static Token.sym.*;
+
+import analizador_semantico.Parser;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+
 import java.util.ArrayList;
 import java_cup.runtime.Symbol;
+
 
 
 /**
@@ -28,16 +29,30 @@ public class Main {
      * @throws java.io.FileNotFoundException
      */
     public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
-        File file=new File("src/analizador_lexico/Lexer.flex");
-        JFlex.Main.generate(file);
+        /*File file=new File("src/analizador_lexico/Lexer.flex");
+        JFlex.Main.generate(file);*/
         
-        String[] argumentos = {"-interface", "-destdir", "src", 
+       String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);
         
-        /*
-        Main m = new Main();
-        m.runScanner("fichero.txt");*/
+        
+        /*Reader reader  = new BufferedReader(new FileReader("prueba.txt"));
+        Scanner lexer = new Scanner (reader);
+         try {
+	  Parser p = new Parser(lexer);
+        p.parse();
+       
+
+      }
+      catch (Exception e) {
+        e.printStackTrace(System.out);
+        System.exit(1);
+      }*/
+        
+        
+        /*Main m = new Main();
+        m.runScanner("prueba.txt");*/
         
         ///////
         /*Reader reader = null ;
@@ -52,7 +67,7 @@ public class Main {
         //mjavac parse = new mjavac(lexer);
         //parse.parse();
        
-
+        //Scanner lexer1 = new Scanner(new FileReader("prueba.txt"));while (( lexer1.debug_next_token()).sym != EOF) {}
     }
     
     
@@ -62,7 +77,7 @@ public class Main {
     private ArrayList<String> lexemas;
     private ArrayList<Token> tokens;
 
-    public void runScanner(String file) throws FileNotFoundException, IOException {
+    /*public void runScanner(String file) throws FileNotFoundException, IOException {
         Scanner lexer = new Scanner(new FileReader(file));
 
         lexemas = new ArrayList();
@@ -82,7 +97,7 @@ public class Main {
                tokens.get(i).getLineas().add(lexer.getLine() + "");
             }
             else{
-                lexemas.add(lexer.yytext());
+                lexemas.add(lexer.getText());
                 token.getLineas().add(lexer.getLine() + "");
                 tokens.add(token);
             }
@@ -96,7 +111,8 @@ public class Main {
             System.out.println(token1.getLexema() + "  ----  " + token1.getTipoToken() + "  ----  " + token1.printLines());
         }
 
-    }
+    }*/
     
     
  }
+

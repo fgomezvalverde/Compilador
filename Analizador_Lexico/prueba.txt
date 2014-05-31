@@ -1,1 +1,29 @@
-int fa= 0x3fff
+int asdd;
+int extern;
+int asdasd,asdaer = 12;
+int asdasd,asdaer = 12;
+extern;
+int asdasd,asdaer = 12;
+	void asd()
+	{	
+		}
+int jasdj()
+	{
+	int asd;
+	write(13);
+	if(extern){break; if(extern){}}
+	else{ asd(123);}
+	}
+	sdfdfs
+void y(int asd)
+{
+	switch(extern){ case 2: break; default: asd();break;}
+	if(extern){}
+	else{ asd(gg);}
+	for(extern;extern;extern)
+	{
+	carro();
+	return 123;
+	}
+	while(extern){return asd; continue;}
+}
