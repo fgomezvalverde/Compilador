@@ -39,6 +39,10 @@ public int getLine(){return yyline;}
 public int getColumn(){return yycolumn;}
 %}
 
+NL         = [\u2028\u2029\u000A\u000B\u000C\u000D\u0085] | \u000D\u000A
+
+Comentario = "/" [^] ~"/" | "/" ""+ "/" | "//"[^\n\r] | "/**" ( [^] | \+ [^/] ) ""+ "/" | "/" ""+ [^/] ~"*/"
+Comentario_linea = "//".*{NL}
 WhiteSpace = [ \t\f\r\n\v]
 
 Identifier = [A-Za-z_][A-Za-z_0-9]*
@@ -179,8 +183,15 @@ FloatLiteral = ( {Float} [fF] | {HexFloatLiteral} )
   {DoubleLiteral} { return symbol(FLOATING_POINT_LITERAL, Double.valueOf(yytext().replaceAll("[lL]",""))); }
   {FloatLiteral} { return symbol(FLOATING_POINT_LITERAL, Float.valueOf(yytext())); }
   
+\" [^\"]* \"    { return symbol(STRING_LITERAL, String.valueOf(yytext()));}
+\' [^\'] \'        { return symbol(CHARACTER_LITERAL, String.valueOf(yytext()));}
+
   /* whitespace */
+  {Comentario_linea} { /* ignore */}
+  {Comentario} { /* ignore */}
   {WhiteSpace} { /* ignore */ }
+  
+
 
   /* identifiers */
   {Identifier} { return symbol(IDENTIFIER, yytext()); }

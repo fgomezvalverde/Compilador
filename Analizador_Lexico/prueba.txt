@@ -1,8 +1,4 @@
-int asdd;
-int extern;
-int asdasd,asdaer = 12;
-int asdasd,asdaer = 12;
-extern;
+
 int asdasd,asdaer = 12;
 	void asd()
 	{	
@@ -11,19 +7,19 @@ int jasdj()
 	{
 	int asd;
 	write(13);
-	if(extern){break; if(extern){}}
+	if(x=0){break; if(asd){}}//asdasd 
 	else{ asd(123);}
 	}
-	sdfdfs
+	
 void y(int asd)
 {
-	switch(extern){ case 2: break; default: asd();break;}
-	if(extern){}
+	switch(2+3+4){ case 2: break; default: asd();break;}
+	if(r=3){}
 	else{ asd(gg);}
-	for(extern;extern;extern)
+	for(x=1;x < 23;x++)
 	{
 	carro();
 	return 123;
 	}
-	while(extern){return asd; continue;}
+	while(po > 23){return asd; continue;}
 }

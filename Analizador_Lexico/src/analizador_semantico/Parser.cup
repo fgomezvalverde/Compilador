@@ -209,11 +209,13 @@ non terminal String type;
 
 // EXPRESIONES
 non terminal String expresiones;
+non terminal String expresiones_statement;
 non terminal String asignacion;
 non terminal String expresion_aritmetica;
 non terminal String expresion_aritmetica_unaria;
 non terminal String expresion_aritmetica_binaria;
 non terminal String expresion_booleana;
+
 
 // OPERADORES
 non terminal String operadores_unarios;
@@ -297,7 +299,7 @@ cuerpo_funcion_aux          ::=
                 estructura_read cuerpo_funcion_aux
         |       estructura_write cuerpo_funcion_aux
         |       llamado_funcion cuerpo_funcion_aux
-        |       expresiones SEMICOLON cuerpo_funcion_aux
+        |       expresiones cuerpo_funcion_aux
         |       statement_if cuerpo_funcion_aux
         |       statement_while cuerpo_funcion_aux
         |       statement_for cuerpo_funcion_aux
@@ -309,23 +311,23 @@ cuerpo_funcion_aux          ::=
 // IF_ELSE **************
 
 statement_if ::=
-                IF LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ELSE LBRACE cuerpo_funcion_aux
-        |       IF LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ;
+                IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ELSE LBRACE cuerpo_funcion_aux
+        |       IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ;
 
 // WHILE
 
 statement_while ::=
-                WHILE LPAREN expresiones RPAREN LBRACE cuerpo_funcion_aux ;
+                WHILE LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ;
 
 // FOR
 
 statement_for   ::=
-                FOR LPAREN expresiones SEMICOLON expresiones SEMICOLON expresiones RPAREN LBRACE cuerpo_funcion_aux;
+                FOR LPAREN expresiones_statement SEMICOLON expresiones_statement SEMICOLON expresiones_statement RPAREN LBRACE cuerpo_funcion_aux;
 
 // SWITCH *****************
 
 statement_switch    ::=
-                SWITCH LPAREN expresiones RPAREN LBRACE statement_switch_aux RBRACE;
+                SWITCH LPAREN expresiones_statement RPAREN LBRACE statement_switch_aux RBRACE;
 
 statement_switch_aux     ::=
         |        CASE INTEGER_LITERAL COLON statement_cuerpo_case statement_switch_aux
@@ -446,10 +448,14 @@ llamado_funcion             ::=
 
 //      EXPRESIONES
 expresiones   ::=
-                asignacion 
-        |       expresion_aritmetica 
-        |       expresion_booleana;
+                asignacion SEMICOLON
+        |       expresion_aritmetica SEMICOLON 
+        |       expresion_booleana SEMICOLON;
  
+expresiones_statement ::=
+                asignacion
+        |       expresion_aritmetica  
+        |       expresion_booleana ;
 
 asignacion ::= 
                 IDENTIFIER operadores_asignacion literal ;      
