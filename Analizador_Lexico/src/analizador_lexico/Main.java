@@ -33,24 +33,16 @@ public class Main {
         File file=new File("src/analizador_lexico/Lexer.flex");
         JFlex.Main.generate(file);
         
-       /*String[] argumentos = {"-interface", "-destdir", "src", 
+     /*String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);*/
         
         
         Reader reader  = new BufferedReader(new FileReader("prueba.txt"));
         Scanner lexer = new Scanner (reader);
-         try {
-	  Parser p = new Parser(lexer);
+	Parser p = new Parser(lexer);
         p.parse();
-       
-
-      }
-      catch (Exception e) {
-        e.printStackTrace(System.out);
-        System.exit(1);
-      }
-        
+ 
         
         /*Main m = new Main();
         m.runScanner("prueba.txt");*/

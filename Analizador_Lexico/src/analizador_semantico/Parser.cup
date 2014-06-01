@@ -32,7 +32,7 @@ parser code  {:
     }
   }
     protected int error_sync_size () {
-        System.out.println(":error_sync_size was called.");
+        //System.out.println(":error_sync_size was called.");
         return 1; // not recommended by the CUP manual
 }
   public void report_error(String message, Object info) {
@@ -99,6 +99,7 @@ action code {:
   terminal TYPEDEF;
   terminal VOLATILE;
   terminal MAIN;
+  
 
   // SEPARADORES
 
@@ -181,7 +182,8 @@ non terminal String statement_variables_locales;
     // IF-ELSE -FOR -WHILE
 non terminal String statement_if;
 non terminal String statement_while;
-non terminal String statement_for;    
+non terminal String statement_for;  
+non terminal String statement_else;  
 
     // SWITCH
 non terminal String statement_switch ;
@@ -202,7 +204,7 @@ non terminal String varios_tipos;
 
 // LITERALES
 non terminal String literal;
-
+non terminal String literal_numerico;
 
 // TIPOS
 non terminal String type;
@@ -260,14 +262,14 @@ statement_globales ::=
 // DECLARACION VARIABLES *******************
 declaracion_identificador ::=
                 type IDENTIFIER varios_identificadores valor_inicial SEMICOLON 
-        |       type error{:System.out.println("Error Semantico: Declaracion Identificador");:} SEMICOLON ;
+        |       error:e{:parser.report_error("Error Semantico: Declaracion Identificador",e);:} SEMICOLON;
 
 varios_identificadores    ::=
                 COMMA IDENTIFIER varios_identificadores
         |       epsilon;
 
 valor_inicial             ::=
-                EQ literal
+                EQ expresiones_statement
         |       epsilon;
 
 // PARTE DE FUNCIONES 
@@ -280,7 +282,8 @@ declaracion_funciones ::=
                 type IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
         |       type IDENTIFIER LPAREN RPAREN cuerpo_funcion
         |       VOID IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
-        |       VOID IDENTIFIER LPAREN RPAREN cuerpo_funcion; 
+        |       VOID IDENTIFIER LPAREN RPAREN cuerpo_funcion
+        |       error:e{:parser.report_error("Error Semantico: Statement de Funciones",e);:} RBRACE ; 
 
 varios_tipos            ::=
                 COMMA type IDENTIFIER varios_tipos
@@ -291,9 +294,8 @@ cuerpo_funcion          ::=
                 LBRACE
                 
                 statement_variables_locales_inicio
-                cuerpo_funcion_aux            //*********************** PROBLEMA AQUI
+                cuerpo_funcion_aux;            //*********************** PROBLEMA AQUI;                
                 
-                ;
 
 cuerpo_funcion_aux          ::=
                 estructura_read cuerpo_funcion_aux
@@ -311,27 +313,34 @@ cuerpo_funcion_aux          ::=
 // IF_ELSE **************
 
 statement_if ::=
-                IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ELSE LBRACE cuerpo_funcion_aux
-        |       IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ;
+                IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux statement_else
+        |       IF error:e{:parser.report_error("Error Semantico: Statement en IF",e);:} RBRACE;
+
+statement_else ::=
+        |        ELSE LBRACE cuerpo_funcion_aux;
 
 // WHILE
 
 statement_while ::=
-                WHILE LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux ;
-
+                WHILE LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux
+        |       WHILE error:e{:parser.report_error("Error Semantico: Statement en WHILE",e);:} RBRACE ;
 // FOR
 
 statement_for   ::=
-                FOR LPAREN expresiones_statement SEMICOLON expresiones_statement SEMICOLON expresiones_statement RPAREN LBRACE cuerpo_funcion_aux;
+                FOR LPAREN expresiones_statement SEMICOLON expresiones_statement SEMICOLON expresiones_statement RPAREN LBRACE cuerpo_funcion_aux
+        |       FOR error:e{:parser.report_error("Error Semantico: Statement en FOR",e);:} RBRACE ;
 
 // SWITCH *****************
 
 statement_switch    ::=
-                SWITCH LPAREN expresiones_statement RPAREN LBRACE statement_switch_aux RBRACE;
+                SWITCH LPAREN expresiones_statement RPAREN LBRACE statement_switch_aux RBRACE
+        |       SWITCH error:e{:parser.report_error("Error Semantico: Statement en SWITCH",e);:} RBRACE ;
 
 statement_switch_aux     ::=
         |        CASE INTEGER_LITERAL COLON statement_cuerpo_case statement_switch_aux
-        |       DEFAULT COLON statement_cuerpo_case statement_switch_aux;
+        |       DEFAULT COLON statement_cuerpo_case statement_switch_aux
+        |       CASE error:e{:parser.report_error("Error Semantico: Statement en CASE",e);:} SEMICOLON 
+        |       DEFAULT error:e{:parser.report_error("Error Semantico: Statement en DEFAULT",e);:} SEMICOLON ;
 
 statement_cuerpo_case         ::=
                 estructura_read statement_cuerpo_case
@@ -405,7 +414,11 @@ literal ::=
         |       OCT_LITERAL
 	|	NULL_LITERAL;
 
-
+literal_numerico ::=
+		INTEGER_LITERAL 
+	|	FLOATING_POINT_LITERAL
+        |       HEX_LITERAL
+        |       OCT_LITERAL;
 
 // TIPOS *****************
 type	::=
@@ -423,34 +436,35 @@ type	::=
 
 estructura_read    ::=
                 READ LPAREN  RPAREN SEMICOLON
-        |       READ LPAREN  estructura_read_parametros RPAREN SEMICOLON;
+        |       READ LPAREN  estructura_read_parametros RPAREN SEMICOLON
+        |       READ  error:e{:parser.report_error("Error Semantico: Uso de READ",e);:}  SEMICOLON ;
 
 estructura_read_parametros  ::=
-               literal;
+               IDENTIFIER;
 
 estructura_write   ::=
-                WRITE LPAREN  estructura_write_parametros RPAREN SEMICOLON;
+                WRITE LPAREN  expresiones RPAREN SEMICOLON
+        |       WRITE error:e{:parser.report_error("Error Semantico: Uso de WRITE",e);:} SEMICOLON ;
                 
 estructura_write_parametros   ::=
                 estructura_write_parametros_aux
         |       estructura_write_parametros_aux COMMA estructura_write_parametros;       
 
 estructura_write_parametros_aux   ::=
-                expresiones
-        |       IDENTIFIER
-        |       literal;
+                 IDENTIFIER
+         |       literal;
 
 // LLAMADO A FUNCION ********
 llamado_funcion             ::=
                 IDENTIFIER LPAREN  RPAREN SEMICOLON
-        |       IDENTIFIER LPAREN  estructura_write_parametros RPAREN SEMICOLON;
+        |       IDENTIFIER LPAREN  estructura_write_parametros_aux RPAREN SEMICOLON
+        |       IDENTIFIER error:e{:parser.report_error("Error Semantico: LLAMADO DE FUNCION",e);:} SEMICOLON ;
                
 
 //      EXPRESIONES
-expresiones   ::=
-                asignacion SEMICOLON
-        |       expresion_aritmetica SEMICOLON 
-        |       expresion_booleana SEMICOLON;
+expresiones   ::= 
+                  expresiones_statement SEMICOLON;
+
  
 expresiones_statement ::=
                 asignacion
@@ -458,7 +472,7 @@ expresiones_statement ::=
         |       expresion_booleana ;
 
 asignacion ::= 
-                IDENTIFIER operadores_asignacion literal ;      
+                IDENTIFIER operadores_asignacion expresion_aritmetica ;      
 
 
 expresion_aritmetica ::= 
@@ -470,104 +484,18 @@ expresion_aritmetica ::=
 
 expresion_aritmetica_unaria ::= 
                  operadores_unarios IDENTIFIER 
-        |        IDENTIFIER operadores_unarios ;
+        |        IDENTIFIER operadores_unarios 
+        |        MINUS literal_numerico
+        |        MINUS IDENTIFIER;
 
 expresion_aritmetica_binaria ::= 
                  expresion_aritmetica operadores_binarios expresion_aritmetica;
         
 
 expresion_booleana ::= 
-          |         expresion_aritmetica operadores_booleanos expresion_aritmetica
-          |         LPAREN expresion_booleana RPAREN;
-
-
-error_semicolon ::=
-                SEMICOLON
-        |       MINUS_MINUS error_semicolon
-        |       AT error_semicolon
-        |       SHORT error_semicolon
-        |       SIGNED error_semicolon
-        |       GT error_semicolon
-        |       POINTER error_semicolon
-        |       PLUS_EQ error_semicolon
-        |       NOTEQ error_semicolon
-        |       TOS error_semicolon
-        |       LT_LT error_semicolon
-        |       REGISTER error_semicolon
-        |       ENUM error_semicolon
-        |       RBRACK error_semicolon
-        |       SIZEOF error_semicolon
-        |       COMMA error_semicolon
-        |       RBRACE error_semicolon
-        |       GT_GT_EQ error_semicolon
-        |       RPAREN error_semicolon
-        |       LBRACK error_semicolon
-        |       LT error_semicolon
-        |       ANDAND error_semicolon
-        |       OROR error_semicolon
-        |       STRUCT error_semicolon
-        |       LBRACE error_semicolon
-        |       MOD_EQ error_semicolon
-        |       LPAREN error_semicolon
-        |       INTEGER_LITERAL error_semicolon
-        |       NOT error_semicolon
-        |       FLOAT error_semicolon
-        |       GOTO error_semicolon
-        |       PLUS_PLUS error_semicolon
-        |       AT_EQ error_semicolon
-        |       EQ error_semicolon
-        |       BOOLEAN_LITERAL error_semicolon
-        |       MOD error_semicolon
-        |       UP_EQ error_semicolon
-        |       LONG error_semicolon
-        |       PLUS error_semicolon
-        |       QUESTION error_semicolon
-        |       WHILE error_semicolon
-        |       CHAR error_semicolon
-        |       BOOLEAN error_semicolon
-        |       SWITCH error_semicolon
-        |       DO error_semicolon
-        |       FOR error_semicolon
-        |       VOID error_semicolon
-        |       EXTERN error_semicolon
-        |       DIV error_semicolon
-        |       DIV_EQ error_semicolon
-        |       PUBLIC error_semicolon
-        |       RETURN error_semicolon
-        |       MULT error_semicolon
-        |       ELSE error_semicolon
-        |       GTEQ error_semicolon
-        |       BREAK error_semicolon
-        |       LT_LT_EQ error_semicolon
-        |       DOT error_semicolon
-        |       INT error_semicolon
-        |       NULL_LITERAL error_semicolon
-        |       OCT_LITERAL error_semicolon
-        |       STRING_LITERAL error_semicolon
-        |       EQEQ error_semicolon
-        |       OR_EQ error_semicolon
-        |       DEFAULT error_semicolon
-        |       MINUS_EQ error_semicolon
-        |       MAIN error_semicolon
-        |       MINUS error_semicolon
-        |       LTEQ error_semicolon
-        |       CONTINUE error_semicolon
-        |       IF error_semicolon
-        |       UNSIGNED error_semicolon
-        |       COLON error_semicolon
-        |       HEX_LITERAL error_semicolon
-        |       CHARACTER_LITERAL error_semicolon
-        |       MULT_EQ error_semicolon
-        |       GT_GT error_semicolon
-        |       VOLATILE error_semicolon
-        |       CASE error_semicolon
-        |       STATIC error_semicolon
-        |       TYPEDEF error_semicolon
-        |       AUTO error_semicolon
-        |       FLOATING_POINT_LITERAL error_semicolon;
-
-
-
+          |       expresion_aritmetica operadores_booleanos expresion_aritmetica
+          |       NOT expresion_aritmetica
+          |       LPAREN expresion_booleana RPAREN;
 // ********** VACIO
 epsilon ::= /*nothing */;
         

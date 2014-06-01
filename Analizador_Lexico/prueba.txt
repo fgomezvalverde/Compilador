@@ -1,25 +1,13 @@
-
-int asdasd,asdaer = 12;
-	void asd()
-	{	
-		}
-int jasdj()
-	{
+int a;
+short asd;
+int asd;
+void asd(int asd){
 	int asd;
-	write(13);
-	if(x=0){break; if(asd){}}//asdasd 
-	else{ asd(123);}
-	}
 	
-void y(int asd)
-{
-	switch(2+3+4){ case 2: break; default: asd();break;}
-	if(r=3){}
-	else{ asd(gg);}
-	for(x=1;x < 23;x++)
-	{
-	carro();
-	return 123;
+	if(asd< 213)
+	{}else{}
+	
+        while (asd > 231) { x++; x--; continue; break;}  //aceptarlo correctamente, el continue y el brea
 	}
-	while(po > 23){return asd; continue;}
-}
+
+int asd (int as){}
