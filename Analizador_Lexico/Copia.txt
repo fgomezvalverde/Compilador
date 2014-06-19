@@ -1,0 +1,20 @@
+int x;                          
+int funcion(){
+
+       if (x=2) {x++;} else {x--;}  //deberia aceptarlo sin error
+       while (1) {x++;}             //deberia aceptarlo sin error
+       while (0) { x++; x--; continue; break;}  //deberia aceptarlo sin error
+
+       if () {} else {}  //deberia dar error, pues debe haber una expresion
+
+Error (line: 8 , column: 11 , lexeme: ')' , sym: RPAREN) : Syntax error
+Error  : Error Semantico: Statement en IF
+Error (line: 8 , column: 16 , lexeme: 'else' , sym: ELSE) : Syntax error
+Error  : Error Semantico: Statement en IF
+
+       for (x=0; ) {} //error pues hay solamente una expresion
+
+        
+        
+
+}

@@ -79,10 +79,9 @@ public interface sym {
   public static final int OR_EQ = 63;
   public static final int DEFAULT = 17;
   public static final int MINUS_EQ = 54;
-  public static final int MAIN = 35;
   public static final int MINUS = 47;
   public static final int LTEQ = 71;
-  public static final int error = 1;
+  public static final int ERROR = 1;
   public static final int CONTINUE = 16;
   public static final int IF = 6;
   public static final int UNSIGNED = 23;
@@ -98,6 +97,6 @@ public interface sym {
   public static final int AUTO = 24;
   public static final int FLOATING_POINT_LITERAL = 81;
   public static final int UP = 93;
-  public static final int CONST = 94;
+  public static final int CONST = 35;
 }
 

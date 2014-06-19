@@ -11,6 +11,9 @@
 
 package node;
 
+@Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
+
+
 public interface Constants {
 
   public static final int INTTYPE  = 1;

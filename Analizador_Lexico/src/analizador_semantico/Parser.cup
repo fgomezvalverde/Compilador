@@ -1,17 +1,33 @@
 
 
+import Token.JavaSymbol;
+import Token.sym.*;
 import java_cup.runtime.*;
 import java.io.*;
 import java.util.*;
-
-
+import analizador_lexico.*;
+import generador.*;
+import java.util.ArrayList;
+import Token.sym.*;
+//import static Token.sym.IDENTIFIER;
 
 
 parser code  {: 
   public static int errors = 0;
   public static int warnings = 0;
   public static analizador_lexico.Scanner s;
-  
+  public static ArrayList<Token> tokens = new ArrayList<Token>();
+    public static ArrayList<String> identis = new ArrayList<String>();
+  public String RESULT= "Pila SEGMENT STACK\n\tdb 64 dup (?)\nPila ENDS\n\ndatos segment\n";
+  public static ArrayList<String> funciones = new ArrayList<String>();
+  public static Pila pila = new Pila();
+  public String MAIN = "";
+  public String FUNCIONES= "";
+  public int cont_while=1;
+  public int cont_if=1;
+  public int cont_else=1;
+  public int cont_bucles =0;
+  public boolean esReturn=false;
 
 
   public static void main(String argv[]) {
@@ -55,7 +71,165 @@ parser code  {:
     throw new RuntimeException("Fatal Syntax Error");
   }
 
+// IDENTIFICADORES
+public void recuerda_tipo()
+{
+    Tipo Reg_Tipo = new Tipo(s.yytext());
+    pila.Push(Reg_Tipo); 
+}
+public void recuerda_id(Object type)
+{
+    
+    Identificador temp = new Identificador(type.toString(),-1);
+    //tokens.add(new Token(new Symbol(79,type.toString())));
+    pila.Push(temp);
+}
+public void valor_id(Object valor)
+{
+    if(valor!= null){
+        Literal temp = new Literal(valor.toString());
+        pila.Push(temp);
+    }
+    else{
+        Literal temp = new Literal("0");
+        pila.Push(temp);
+    }
+}
 
+public void inserta_TS()
+{
+    IData temp;
+    boolean pasa = true;
+    while(!pila.isEmpty()){
+        temp = pila.Pop();
+        if(temp.getTipo()==1){
+            if(identis.contains(temp.valor())){
+                 // EL IDENTIFICADOR YA HA SIDO AGREGADO
+                 System.err.println("ERROR SEMANTICO: identificador "+ temp.valor()+" anteriormente instanciado");
+                 pasa = false;
+            }
+            else{
+                RESULT += temp.CodigoGenerar();
+                identis.add(temp.valor());
+            }
+        }
+        else{
+        if(pasa)
+            RESULT += temp.CodigoGenerar();
+        
+        else{
+            pasa = true;
+            // SE DEBE OMITIR EL AGREGAR, ya que es un valor inicial para un Error Semantico
+        }
+        }
+    }
+}
+
+// FUNCIONES
+public void crear_slot_funcion()
+{
+    pila.Push(new Funcion(""));
+}
+public void funcion_Insertar(Object nombre)
+{
+    if(nombre.toString().equals("main"))
+    {
+        funciones.add(nombre.toString());
+        MAIN += "main:\n";
+        // HACER TODAS LAS COSAS CON LA PILA SEMENTICA
+        Funcion temp = (Funcion) pila.Pop();
+        MAIN += temp.valor();
+
+        // VIENE EL CIERRE DEL PROGRAMA
+        MAIN += "\ncierre:\n";
+        MAIN += "\tmov ah,4ch\n";
+        MAIN += "\tmov al,07h\n";
+            
+        MAIN += "\tint 21h\n\n";
+        MAIN += "codigo endS\n";
+        MAIN += "end main";
+
+    }
+    else{
+        funciones.add(nombre.toString());
+        FUNCIONES += nombre.toString()+" Proc Near\n";
+        
+        //HACER TODAS LAS COSAS CON LA PILA SEMANTICA
+        Funcion temp = (Funcion) pila.Pop();
+        FUNCIONES += temp.valor();
+
+        FUNCIONES += nombre.toString()+" endP\n\n";
+    }
+}
+
+public void revisar_Main()
+{
+    if(!funciones.contains("main"))
+    {
+        System.err.println("ERROR SEMANTICO: No se declaro ningun MAIN");
+    }
+    RESULT += FUNCIONES + MAIN;
+}
+
+// REVISAR RETURN
+public void revisar_Return()
+{
+    cont_bucles--;
+    if(esReturn && cont_bucles==0)
+    {
+        System.err.println("ERROR SEMANTICO: No se declaro return en la funcion");
+        esReturn = false;
+    }
+}
+
+// WHILE
+
+public void iniciar_while()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "start_while"+cont_while+":\n";
+    pila.Push(new Funcion(temp));
+}
+public void evaluar_while()
+{
+    String oper="<=";
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tCMP OBJ1,OBJ2\n";
+    
+    if(oper.equals("<=")){
+        temp+= "\tJLE end_while"+cont_while+"\n";
+    }
+    else if(oper.equals("=<")){
+        temp+= "\tJGE end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals("!=")){
+        temp+= "\tJNE end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals("==")){
+        temp+= "\tJE end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals("<")){
+        temp+= "\tJL end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals(">")){
+        temp+= "\tJG end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals("||")){
+        temp+= "\tNULL end_while"+cont_while+"\n";    
+    }
+    else if(oper.equals("&&")){
+        temp+= "\tNULL end_while"+cont_while+"\n";    
+    }
+    pila.Push(new Funcion(temp));
+}
+public void terminar_while()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp +="\tJUMP start_while"+cont_while+"\n";
+    temp +="end_while"+cont_while+":\n";
+    cont_while++;
+    pila.Push(new Funcion(temp));
+}
 :};
 
 action code {:
@@ -99,7 +273,6 @@ action code {:
   terminal TYPEDEF;
   terminal VOLATILE;
   terminal MAIN;
-  
 
   // SEPARADORES
 
@@ -256,34 +429,32 @@ estructura ::=
 
 // PARTE DE GLOBALES
 statement_globales ::= 
-                declaracion_identificador statement_globales
-        |       declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
+                declaracion_identificador statement_globales {:RESULT += "datos endS\n\ncodigo segment\n\tASSUME CS:Codigo, DS:Datos, SS:Pila\n\n";:}
+        |        declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
 
 // DECLARACION VARIABLES *******************
 declaracion_identificador ::=
-                type IDENTIFIER varios_identificadores valor_inicial SEMICOLON 
-        |       error:e{:parser.report_error("Error Semantico: Declaracion Identificador",e);:} SEMICOLON;
+                type  IDENTIFIER:i  varios_identificadores valor_inicial SEMICOLON {:parser.recuerda_id(i);parser.inserta_TS();:}
+        |       error:e{:parser.report_error("Error Sintactico: Declaracion Identificador",e);:} SEMICOLON;
 
 varios_identificadores    ::=
-                COMMA IDENTIFIER varios_identificadores
+                COMMA  IDENTIFIER:i  varios_identificadores  {:parser.valor_id(null);parser.recuerda_id(i);:}
         |       epsilon;
 
 valor_inicial             ::=
-                EQ expresiones_statement
-        |       epsilon;
+                epsilon {:parser.valor_id(null);:}
+        |       EQ literal_numerico;
 
 // PARTE DE FUNCIONES 
 statement_funciones  ::=
                 declaracion_funciones statement_funciones
-        |       epsilon;
+        |       epsilon {:parser.revisar_Main();:};
                 
 
 declaracion_funciones ::=
-                type IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
-        |       type IDENTIFIER LPAREN RPAREN cuerpo_funcion
-        |       VOID IDENTIFIER LPAREN type IDENTIFIER varios_tipos RPAREN cuerpo_funcion
-        |       VOID IDENTIFIER LPAREN RPAREN cuerpo_funcion
-        |       error:e{:parser.report_error("Error Semantico: Statement de Funciones",e);:} RBRACE ; 
+                 type  IDENTIFIER:i {:parser.esReturn= true;parser.cont_bucles++;parser.crear_slot_funcion();:} LPAREN RPAREN cuerpo_funcion           {:parser.funcion_Insertar(i);:}
+        |       VOID IDENTIFIER:i {:parser.esReturn= false;parser.cont_bucles++;parser.crear_slot_funcion();:} LPAREN RPAREN cuerpo_funcion                          {:parser.funcion_Insertar(i);:}
+        |       error:e{:parser.report_error("Error Sintactico: Statement de Funciones",e);:} RBRACE ; 
 
 varios_tipos            ::=
                 COMMA type IDENTIFIER varios_tipos
@@ -291,10 +462,7 @@ varios_tipos            ::=
 
 // CUERPO DE LA FUNCION
 cuerpo_funcion          ::=
-                LBRACE
-                
-                statement_variables_locales_inicio
-                cuerpo_funcion_aux;            //*********************** PROBLEMA AQUI;                
+                LBRACE cuerpo_funcion_aux;                          
                 
 
 cuerpo_funcion_aux          ::=
@@ -304,17 +472,16 @@ cuerpo_funcion_aux          ::=
         |       expresiones cuerpo_funcion_aux
         |       statement_if cuerpo_funcion_aux
         |       statement_while cuerpo_funcion_aux
-        |       statement_for cuerpo_funcion_aux
-        |       statement_switch cuerpo_funcion_aux
-        |       otras_palabras   cuerpo_funcion_aux
-        |       RBRACE;     // SE TERMINA LA FUNCION    
+        |       RETURN literal_numerico  SEMICOLON RBRACE {:parser.esReturn=false;parser.cont_bucles=0;:}
+        |       RBRACE {:parser.revisar_Return();:};     // SE TERMINA LA FUNCION    
+
 
 
 // IF_ELSE **************
 
 statement_if ::=
                 IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux statement_else
-        |       IF error:e{:parser.report_error("Error Semantico: Statement en IF",e);:} RBRACE;
+        |       IF error:e{:parser.report_error("Error Sintactico: Statement en IF",e);:} RBRACE;
 
 statement_else ::=
         |        ELSE LBRACE cuerpo_funcion_aux;
@@ -322,25 +489,25 @@ statement_else ::=
 // WHILE
 
 statement_while ::=
-                WHILE LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux
-        |       WHILE error:e{:parser.report_error("Error Semantico: Statement en WHILE",e);:} RBRACE ;
+                WHILE {:parser.cont_bucles++;parser.iniciar_while();:} LPAREN expresiones_statement {:parser.evaluar_while();:} RPAREN LBRACE cuerpo_funcion_aux {:parser.terminar_while();:}
+        |       WHILE error:e{:parser.report_error("Error Sintactico: Statement en WHILE",e);:} RBRACE ;
 // FOR
 
 statement_for   ::=
                 FOR LPAREN expresiones_statement SEMICOLON expresiones_statement SEMICOLON expresiones_statement RPAREN LBRACE cuerpo_funcion_aux
-        |       FOR error:e{:parser.report_error("Error Semantico: Statement en FOR",e);:} RBRACE ;
+        |       FOR error:e{:parser.report_error("Error Sintactico: Statement en FOR",e);:} RBRACE ;
 
 // SWITCH *****************
 
 statement_switch    ::=
                 SWITCH LPAREN expresiones_statement RPAREN LBRACE statement_switch_aux RBRACE
-        |       SWITCH error:e{:parser.report_error("Error Semantico: Statement en SWITCH",e);:} RBRACE ;
+        |       SWITCH error:e{:parser.report_error("Error Sintactico: Statement en SWITCH",e);:} RBRACE ;
 
 statement_switch_aux     ::=
         |        CASE INTEGER_LITERAL COLON statement_cuerpo_case statement_switch_aux
         |       DEFAULT COLON statement_cuerpo_case statement_switch_aux
-        |       CASE error:e{:parser.report_error("Error Semantico: Statement en CASE",e);:} SEMICOLON 
-        |       DEFAULT error:e{:parser.report_error("Error Semantico: Statement en DEFAULT",e);:} SEMICOLON ;
+        |       CASE error:e{:parser.report_error("Error Sintactico: Statement en CASE",e);:} SEMICOLON 
+        |       DEFAULT error:e{:parser.report_error("Error Sintactico: Statement en DEFAULT",e);:} SEMICOLON ;
 
 statement_cuerpo_case         ::=
                 estructura_read statement_cuerpo_case
@@ -415,10 +582,10 @@ literal ::=
 	|	NULL_LITERAL;
 
 literal_numerico ::=
-		INTEGER_LITERAL 
-	|	FLOATING_POINT_LITERAL
-        |       HEX_LITERAL
-        |       OCT_LITERAL;
+		INTEGER_LITERAL:v {:parser.valor_id(v);:}
+	|	FLOATING_POINT_LITERAL:v {:parser.valor_id(v);:}
+        |       HEX_LITERAL:v {:parser.valor_id(v);:}
+        |       OCT_LITERAL:v {:parser.valor_id(v);:};
 
 // TIPOS *****************
 type	::=
@@ -437,14 +604,14 @@ type	::=
 estructura_read    ::=
                 READ LPAREN  RPAREN SEMICOLON
         |       READ LPAREN  estructura_read_parametros RPAREN SEMICOLON
-        |       READ  error:e{:parser.report_error("Error Semantico: Uso de READ",e);:}  SEMICOLON ;
+        |       READ  error:e{:parser.report_error("Error Sintactico: Uso de READ",e);:}  SEMICOLON ;
 
 estructura_read_parametros  ::=
                IDENTIFIER;
 
 estructura_write   ::=
                 WRITE LPAREN  expresiones RPAREN SEMICOLON
-        |       WRITE error:e{:parser.report_error("Error Semantico: Uso de WRITE",e);:} SEMICOLON ;
+        |       WRITE error:e{:parser.report_error("Error Sintactico: Uso de WRITE",e);:} SEMICOLON ;
                 
 estructura_write_parametros   ::=
                 estructura_write_parametros_aux
@@ -458,7 +625,7 @@ estructura_write_parametros_aux   ::=
 llamado_funcion             ::=
                 IDENTIFIER LPAREN  RPAREN SEMICOLON
         |       IDENTIFIER LPAREN  estructura_write_parametros_aux RPAREN SEMICOLON
-        |       IDENTIFIER error:e{:parser.report_error("Error Semantico: LLAMADO DE FUNCION",e);:} SEMICOLON ;
+        |       IDENTIFIER error:e{:parser.report_error("Error Sintactico: LLAMADO DE FUNCION",e);:} SEMICOLON ;
                
 
 //      EXPRESIONES
@@ -493,7 +660,7 @@ expresion_aritmetica_binaria ::=
         
 
 expresion_booleana ::= 
-          |       expresion_aritmetica operadores_booleanos expresion_aritmetica
+                  expresion_aritmetica operadores_booleanos expresion_aritmetica
           |       NOT expresion_aritmetica
           |       LPAREN expresion_booleana RPAREN;
 // ********** VACIO

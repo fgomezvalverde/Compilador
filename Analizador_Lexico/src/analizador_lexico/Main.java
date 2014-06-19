@@ -6,6 +6,7 @@ package analizador_lexico;
 
 
 
+import static Token.sym.*;
 import analizador_semantico.Parser;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,20 +31,21 @@ public class Main {
      * @throws java.io.FileNotFoundException
      */
     public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
-        File file=new File("src/analizador_lexico/Lexer.flex");
-        JFlex.Main.generate(file);
+        /*File file=new File("src/analizador_lexico/Lexer.flex");
+        JFlex.Main.generate(file);*/
         
-     /*String[] argumentos = {"-interface", "-destdir", "src", 
+        /*String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);*/
         
-        
-        Reader reader  = new BufferedReader(new FileReader("prueba.txt"));
+        String nombre_Archivo = "prueba.txt";
+        Reader reader  = new BufferedReader(new FileReader(nombre_Archivo));
+        //runScanner(nombre_Archivo);
         Scanner lexer = new Scanner (reader);
 	Parser p = new Parser(lexer);
         p.parse();
- 
-        
+        System.out.println(p.RESULT);
+
         /*Main m = new Main();
         m.runScanner("prueba.txt");*/
         
@@ -64,18 +66,17 @@ public class Main {
     }
     
     
-        private Token token;
-    private Symbol tipoToken;
+    private static Token token;
+    private static Symbol tipoToken;
 
-    private ArrayList<String> lexemas;
-    private ArrayList<Token> tokens;
+    private static ArrayList<String> lexemas;
+    public static ArrayList<Token> tokens;
 
-    /*public void runScanner(String file) throws FileNotFoundException, IOException {
+    public static void runScanner(String file) throws FileNotFoundException, IOException {
         Scanner lexer = new Scanner(new FileReader(file));
-
         lexemas = new ArrayList();
         tokens = new ArrayList();
-
+        
         while ((tipoToken =  lexer.next_token()).sym != EOF) {
             if(tipoToken.sym == ERROR){
             System.out.print("\n");
@@ -104,7 +105,7 @@ public class Main {
             System.out.println(token1.getLexema() + "  ----  " + token1.getTipoToken() + "  ----  " + token1.printLines());
         }
 
-    }*/
+    }
     
     
  }

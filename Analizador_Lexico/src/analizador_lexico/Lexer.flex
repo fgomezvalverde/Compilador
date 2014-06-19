@@ -80,94 +80,93 @@ FloatLiteral = ( {Float} [fF] | {HexFloatLiteral} )
 
 
   /* keywords */
-  "boolean"                      { return symbol(BOOLEAN); }
-  "char"                         { return symbol(CHAR); }
-  "else"                         { return symbol(ELSE); }
-  "int"                          { return symbol(INT); }
-  "if"                           { return symbol(IF); }
-  "public"                       { return symbol(PUBLIC); }
-  "return"                       { return symbol(RETURN); }
-  "void"                         { return symbol(VOID); }
-  "while"                        { return symbol(WHILE); }
-  "float"                        { return symbol(FLOAT); }
-  "long"                        { return symbol(LONG); }                            
-  "short"                        { return symbol(SHORT); }
-  "break"                        { return symbol(BREAK); }                            
-  "case"                        { return symbol(CASE); }
-  "continue"                        { return symbol(CONTINUE); }                            
-  "default"                        { return symbol(DEFAULT); }
-  "do"                        { return symbol(DO); }                            
-  "for"                        { return symbol(FOR); }
-  "switch"                        { return symbol(SWITCH); }                            
-  "read"                        { return symbol(READ); }                            
-  "write"                        { return symbol(WRITE); }
-  "const"                       {return symbol(CONST);}
-"unsigned"               {return symbol(UNSIGNED);}
-"auto"                   {return symbol(AUTO);}
-"static"                 {return symbol(STATIC);}
-"enum"      		 {return symbol(ENUM);}
-"extern"      		 {return symbol(EXTERN);}
-"goto"      		 {return symbol(GOTO);}
-"register"               {return symbol(REGISTER);}
-"signed"      		 {return symbol(SIGNED);}
-"sizeof"      		 {return symbol(SIZEOF);}
-"struct"      		 {return symbol(STRUCT);}
-"typedef"      		 {return symbol(TYPEDEF);}
-"volatile"               {return symbol(VOLATILE);}
-"main"			 {return symbol(MAIN);}
+  "boolean"                      { return symbol(BOOLEAN,yytext()); }
+  "char"                         { return symbol(CHAR,yytext()); }
+  "else"                         { return symbol(ELSE,yytext()); }
+  "int"                          { return symbol(INT,yytext()); }
+  "if"                           { return symbol(IF,yytext()); }
+  "public"                       { return symbol(PUBLIC,yytext()); }
+  "return"                       { return symbol(RETURN,yytext()); }
+  "void"                         { return symbol(VOID,yytext()); }
+  "while"                        { return symbol(WHILE,yytext()); }
+  "float"                        { return symbol(FLOAT,yytext()); }
+  "long"                        { return symbol(LONG,yytext()); }                            
+  "short"                        { return symbol(SHORT,yytext()); }
+  "break"                        { return symbol(BREAK,yytext()); }                            
+  "case"                        { return symbol(CASE,yytext()); }
+  "continue"                        { return symbol(CONTINUE,yytext()); }                            
+  "default"                        { return symbol(DEFAULT,yytext()); }
+  "do"                        { return symbol(DO,yytext()); }                            
+  "for"                        { return symbol(FOR,yytext()); }
+  "switch"                        { return symbol(SWITCH,yytext()); }                            
+  "read"                        { return symbol(READ,yytext()); }                            
+  "write"                        { return symbol(WRITE,yytext()); }
+  "const"                       {return symbol(CONST,yytext());}
+"unsigned"               {return symbol(UNSIGNED,yytext());}
+"auto"                   {return symbol(AUTO,yytext());}
+"static"                 {return symbol(STATIC,yytext());}
+"enum"      		 {return symbol(ENUM,yytext());}
+"extern"      		 {return symbol(EXTERN,yytext());}
+"goto"      		 {return symbol(GOTO,yytext());}
+"register"               {return symbol(REGISTER,yytext());}
+"signed"      		 {return symbol(SIGNED,yytext());}
+"sizeof"      		 {return symbol(SIZEOF,yytext());}
+"struct"      		 {return symbol(STRUCT,yytext());}
+"typedef"      		 {return symbol(TYPEDEF,yytext());}
+"volatile"               {return symbol(VOLATILE,yytext());}
   "true"                         { return symbol(BOOLEAN_LITERAL, new Boolean(true)); }
   "false"                        { return symbol(BOOLEAN_LITERAL, new Boolean(false)); }
-  "null"                         { return symbol(NULL_LITERAL); }
+  "null"                         { return symbol(NULL_LITERAL,yytext()); }
 
   /* separators */
-  "("                            { return symbol(LPAREN); }
-  ")"                            { return symbol(RPAREN); }
-  "{"                            { return symbol(LBRACE); }
-  "}"                            { return symbol(RBRACE); }
-  "["                            { return symbol(LBRACK); }
-  "]"                            { return symbol(RBRACK); }
-  ";"                            { return symbol(SEMICOLON); }
-  ","                            { return symbol(COMMA); }
-  "."                            { return symbol(DOT); }
+  "("                            { return symbol(LPAREN,yytext()); }
+  ")"                            { return symbol(RPAREN,yytext()); }
+  "{"                            { return symbol(LBRACE,yytext()); }
+  "}"                            { return symbol(RBRACE,yytext()); }
+  "["                            { return symbol(LBRACK,yytext()); }
+  "]"                            { return symbol(RBRACK,yytext()); }
+  ";"                            { return symbol(SEMICOLON,yytext()); }
+  ","                            { return symbol(COMMA,yytext()); }
+  "."                            { return symbol(DOT,yytext()); }
   
   /* operators */
-  "="                            { return symbol(EQ); }
-  ">"                            { return symbol(GT); }
-  "<"                            { return symbol(LT); }
-  "!"                            { return symbol(NOT); }
-  "?"                            { return symbol(QUESTION); }
-  ":"                            { return symbol(COLON); }
-  "=="                           { return symbol(EQEQ); }
-  "<="                           { return symbol(LTEQ); }
-  ">="                           { return symbol(GTEQ); }
-  "!="                           { return symbol(NOTEQ); }
-  "&&"                           { return symbol(ANDAND); }
-  "&"          			   { return symbol(AT); }
-  "||"                           { return symbol(OROR); } 
-  "+"                            { return symbol(PLUS); }
-  "-"                            { return symbol(MINUS); }
-  "*"                            { return symbol(MULT); }
-  "/"                            { return symbol(DIV); }
-  "%"                            { return symbol(MOD); }
-  "^"                           {return symbol(UP);}
+  "="                            { return symbol(EQ,yytext()); }
+  ">"                            { return symbol(GT,yytext()); }
+  "<"                            { return symbol(LT,yytext()); }
+  "!"                            { return symbol(NOT,yytext()); }
+  "?"                            { return symbol(QUESTION,yytext()); }
+  ":"                            { return symbol(COLON,yytext()); }
+  "=="                           { return symbol(EQEQ,yytext()); }
+  "<="                           { return symbol(LTEQ,yytext()); }
+  ">="                           { return symbol(GTEQ,yytext()); }
+  "!="                           { return symbol(NOTEQ,yytext()); }
+  "&&"                           { return symbol(ANDAND,yytext()); }
+  "&"          			   { return symbol(AT,yytext()); }
+  "||"                           { return symbol(OROR,yytext()); } 
+  "+"                            { return symbol(PLUS,yytext()); }
+  "-"                            { return symbol(MINUS,yytext()); }
+  "*"                            { return symbol(MULT,yytext()); }
+  "/"                            { return symbol(DIV,yytext()); }
+  "%"                            { return symbol(MOD,yytext()); }
+  "^"                           {return symbol(UP,yytext());}
 
-  "++"                            { return symbol(PLUS_PLUS); }
-  "--"                            { return symbol(MINUS_MINUS); }
+  "++"                            { return symbol(PLUS_PLUS,yytext()); }
+  "--"                            { return symbol(MINUS_MINUS,yytext()); }
 
-  "+="                            { return symbol(PLUS_EQ); }
-  "-="                            { return symbol(MINUS_EQ); }
-  "*="                            { return symbol(MULT_EQ); }
-  "/="                            { return symbol(DIV_EQ); }
-">>"                     { return symbol(GT_GT); }
-"<<"                     { return symbol(LT_LT); }
-"~"                      { return symbol(TOS); }
-"%="                     { return symbol(MOD_EQ); }
-"&="                     { return symbol(AT_EQ); }
-"^="                     { return symbol(UP_EQ); }
-"|="                     { return symbol(OR_EQ); }
-"<<="                    { return symbol(LT_LT_EQ); }
-">>="                    { return symbol(GT_GT_EQ); }
-"->"                     { return symbol(POINTER); }
+  "+="                            { return symbol(PLUS_EQ,yytext()); }
+  "-="                            { return symbol(MINUS_EQ,yytext()); }
+  "*="                            { return symbol(MULT_EQ,yytext()); }
+  "/="                            { return symbol(DIV_EQ,yytext()); }
+">>"                     { return symbol(GT_GT,yytext()); }
+"<<"                     { return symbol(LT_LT,yytext()); }
+"~"                      { return symbol(TOS,yytext()); }
+"%="                     { return symbol(MOD_EQ,yytext()); }
+"&="                     { return symbol(AT_EQ,yytext()); }
+"^="                     { return symbol(UP_EQ,yytext()); }
+"|="                     { return symbol(OR_EQ,yytext()); }
+"<<="                    { return symbol(LT_LT_EQ,yytext()); }
+">>="                    { return symbol(GT_GT_EQ,yytext()); }
+"->"                     { return symbol(POINTER,yytext()); }
 
 
 {DecIntegerLiteral} { return symbol(INTEGER_LITERAL, Integer.valueOf(yytext().replaceAll("[uU]",""),10)); }
@@ -198,6 +197,6 @@ FloatLiteral = ( {Float} [fF] | {HexFloatLiteral} )
 }
 
 /* error fallback */
-.|\n { throw new RuntimeException("Illegal character \""+yytext()+
-                                                              "\" at line "+(yyline+1)+", column "+(yycolumn+1)); }
+.|\n { throw new RuntimeException("ERROR LEXICO: Illegal character \""+yytext()+"\" at line "+(yyline+1)+", column "+(yycolumn+1)); }
+//.|\n   {return symbol(ERROR, yytext());   }                                                        
 <<EOF>> { return symbol(EOF); }

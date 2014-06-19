@@ -1,13 +1,12 @@
-int a;
-short asd;
-int asd;
-void asd(int asd){
-	int asd;
-	
-	if(asd< 213)
-	{}else{}
-	
-        while (asd > 231) { x++; x--; continue; break;}  //aceptarlo correctamente, el continue y el brea
-	}
+int as;
+int asd=1;
+int s,r,t;
+void mains() {
+while(true){} 
+a= a*e; 
+}  
 
-int asd (int as){}
+void main(){
+	while(asd){}
+
+}
