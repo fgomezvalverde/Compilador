@@ -28,7 +28,7 @@ public class Identificador implements IData{
     {return nombre;}
     @Override
     public String CodigoGenerar() {
-       return "\t"+nombre + "\tdw\t";
+       return "\t"+nombre + "\tdb\t";
     }
     public int getTipo()
     {return 1;}

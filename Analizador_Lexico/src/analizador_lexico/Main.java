@@ -9,9 +9,11 @@ package analizador_lexico;
 import static Token.sym.*;
 import analizador_semantico.Parser;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -38,14 +40,31 @@ public class Main {
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);*/
         
-        String nombre_Archivo = "prueba.txt";
-        Reader reader  = new BufferedReader(new FileReader(nombre_Archivo));
+        String nombre_Archivo = "prueba";
+        Reader reader  = new BufferedReader(new FileReader(nombre_Archivo+".c"));
         //runScanner(nombre_Archivo);
         Scanner lexer = new Scanner (reader);
 	Parser p = new Parser(lexer);
         p.parse();
         System.out.println(p.RESULT);
-
+        try {
+			File file = new File("C:\\tasm\\"+nombre_Archivo+".asm");
+ 
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+ 
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(p.RESULT);
+			bw.close();
+ 
+			System.out.println("Done");
+ 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         
         /*datos endS
             codigo segment

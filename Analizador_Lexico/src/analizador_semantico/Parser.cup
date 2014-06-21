@@ -22,7 +22,9 @@ parser code  {:
   public static ArrayList<String> funciones = new ArrayList<String>();
   public static Pila pila = new Pila();
   public String MAIN = "";
-  public String FUNCIONES= "datos endS\n\ncodigo segment\n\tASSUME CS:Codigo, DS:Datos, SS:Pila\n\n";
+  public String WRITE_MACRO ="write Macro numero\n\tmov al,numero\n\taam\n\tadd ax,3030h\n\txchg al,ah\n\tint 29h\n\tmov al,ah\n\tint 29h\nendM\n";
+  public String READ_MACRO = "read Macro\n\tmov ah,01h\n\tint 21h\n\tsub al,48\nendM\n";
+  public String FUNCIONES= "datos endS\n\n"+WRITE_MACRO+READ_MACRO+"codigo segment\n\tASSUME CS:Codigo, DS:Datos, SS:Pila\n\n";
   public int cont_while=1;
   public int cont_if=1;
   public int cont_else=1;
@@ -136,6 +138,9 @@ public void funcion_Insertar(Object nombre)
     {
         funciones.add(nombre.toString());
         MAIN += "main:\n";
+        MAIN += "\tmov ax,datos\n";
+        MAIN += "\tmov ds,ax\n";
+        MAIN += "\tmov bx,ss\n";
         // HACER TODAS LAS COSAS CON LA PILA SEMENTICA
         Funcion temp = (Funcion) pila.Pop();
         MAIN += temp.valor();
@@ -157,7 +162,7 @@ public void funcion_Insertar(Object nombre)
         //HACER TODAS LAS COSAS CON LA PILA SEMANTICA
         Funcion temp = (Funcion) pila.Pop();
         FUNCIONES += temp.valor();
-
+        FUNCIONES += "\tret\n";
         FUNCIONES += nombre.toString()+" endP\n\n";
     }
 }
@@ -190,7 +195,7 @@ public void revisar_Return()
 public void generar_Return(Object obj)
 {
     String temp = ((Funcion)pila.Pop()).valor();
-    temp += "\tmov ax,"+obj.toString()+"\n";
+    temp += "\tmov al,"+obj.toString()+"\n";
     pila.Push(new Funcion(temp));
 }
 // WHILE
@@ -237,8 +242,8 @@ public void evaluar_while_doble_identi(Object pri,Object oper,Object seg)
 {
     
     String temp = ((Funcion)pila.Pop()).valor();
-    temp += "\tmov ax,"+seg.toString()+"\n";
-    temp += "\tCMP "+pri.toString()+",ax\n";
+    temp += "\tmov al,"+seg.toString()+"\n";
+    temp += "\tCMP "+pri.toString()+",al\n";
     
     if(oper.toString().equals("<=")){
         temp+= "\tJLE end_while"+cont_while+"\n";
@@ -305,6 +310,137 @@ public void revisar_funcion(Object obj)
     {
         System.err.println("ERROR SEMANTICO: Funcion => "+obj.toString()+" nunca declarada" );
     }
+}
+
+// IF-ELSE
+public void iniciar_if()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "start_if"+cont_if+":\n";
+    pila.Push(new Funcion(temp));
+}
+public void terminar_if()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp +="else"+cont_if+":\n";
+    cont_if++;
+    pila.Push(new Funcion(temp));
+}
+public void terminar_if_else()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp +="\tJMP end_else"+cont_if+"\n";
+    temp +="else"+cont_if+":\n";
+    pila.Push(new Funcion(temp));
+}
+public void terminar_else()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp +="end_else"+cont_if+":\n";
+    cont_if++;
+    pila.Push(new Funcion(temp));
+}
+
+public void evaluar_if(Object pri,Object oper,Object seg)
+{
+    
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tCMP "+pri.toString()+","+seg.toString()+"\n";
+    
+    if(oper.toString().equals("<=")){
+        temp+= "\tJLE else"+cont_if+"\n";
+    }
+    else if(oper.toString().equals("=<")){
+        temp+= "\tJGE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("!=")){
+        temp+= "\tJNE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("==")){
+        temp+= "\tJE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("<")){
+        temp+= "\tJL else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals(">")){
+        temp+= "\tJG else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("||")){
+        temp+= "\tJE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("&&")){
+        temp+= "\tJNE else"+cont_if+"\n";    
+    }
+    pila.Push(new Funcion(temp));
+}
+public void evaluar_if_doble_identi(Object pri,Object oper,Object seg)
+{
+    
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tmov al,"+seg.toString()+"\n";
+    temp += "\tCMP "+pri.toString()+",al\n";
+    
+    if(oper.toString().equals("<=")){
+        temp+= "\tJLE else"+cont_if+"\n";
+    }
+    else if(oper.toString().equals("=<")){
+        temp+= "\tJGE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("!=")){
+        temp+= "\tJNE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("==")){
+        temp+= "\tJE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("<")){
+        temp+= "\tJL else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals(">")){
+        temp+= "\tJG else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("||")){
+        temp+= "\tJE else"+cont_if+"\n";    
+    }
+    else if(oper.toString().equals("&&")){
+        temp+= "\tJNE else"+cont_if+"\n";    
+    }
+    pila.Push(new Funcion(temp));
+}
+
+public void evaluar_if_unario(Object pri,Object oper)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tCMP "+pri.toString()+",1\n";
+    
+    if(oper.toString().equals("!")){
+
+        temp+= "\tJNE else"+cont_if+"\n";
+    }
+    else{
+        temp+= "\tJE else"+cont_if+"\n";
+    }
+    pila.Push(new Funcion(temp));
+}
+
+public void generar_read(Object obj)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp+= "\tread\n";
+    temp+= "\tmov "+obj.toString()+",al\n";
+    pila.Push(new Funcion(temp));       
+}
+public void generar_read()
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp+= "\tread\n";
+    pila.Push(new Funcion(temp));    
+}
+
+public void generar_write(Object obj)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp+= "\twrite "+obj.toString()+"\n";
+    pila.Push(new Funcion(temp));    
 }
 
 :};
@@ -469,7 +605,7 @@ non terminal String expresion_aritmetica_binaria;
 non terminal String expresion_booleana;
 
 non terminal String expresiones_state;  // AYUDA CON EXPRESIONES DE WHILE NUEVO
-
+non terminal String expresiones_state_if;
 
 // OPERADORES
 non terminal String operadores_unarios;
@@ -560,11 +696,11 @@ cuerpo_funcion_aux          ::=
 // IF_ELSE **************
 
 statement_if ::=
-                IF LPAREN expresiones_statement RPAREN LBRACE cuerpo_funcion_aux statement_else
+                IF {:parser.cont_bucles++;parser.iniciar_if();:}LPAREN expresiones_state_if RPAREN LBRACE cuerpo_funcion_aux statement_else
         |       IF error:e{:parser.report_error("Error Sintactico: Statement en IF",e);:} RBRACE;
 
 statement_else ::=
-        |        ELSE LBRACE cuerpo_funcion_aux;
+     {:parser.terminar_if();:}   |        ELSE {:parser.cont_bucles++;parser.terminar_if_else();:} LBRACE cuerpo_funcion_aux {:parser.terminar_else();:};
 
 // WHILE
 
@@ -682,15 +818,15 @@ type	::=
 // READ AND WRITE **************
 
 estructura_read    ::=
-                READ LPAREN  RPAREN SEMICOLON
-        |       READ LPAREN  estructura_read_parametros RPAREN SEMICOLON
+                READ LPAREN  RPAREN SEMICOLON {:parser.generar_read();:}
+        |       READ LPAREN  IDENTIFIER:i RPAREN SEMICOLON {:parser.generar_read(i);:}
         |       READ  error:e{:parser.report_error("Error Sintactico: Uso de READ",e);:}  SEMICOLON ;
 
 estructura_read_parametros  ::=
-               IDENTIFIER;
+               ; 
 
 estructura_write   ::=
-                WRITE LPAREN  expresiones RPAREN SEMICOLON
+                WRITE LPAREN  estructura_write_parametros_aux RPAREN SEMICOLON
         |       WRITE error:e{:parser.report_error("Error Sintactico: Uso de WRITE",e);:} SEMICOLON ;
                 
 estructura_write_parametros   ::=
@@ -698,8 +834,8 @@ estructura_write_parametros   ::=
         |       estructura_write_parametros_aux COMMA estructura_write_parametros;       
 
 estructura_write_parametros_aux   ::=
-                 IDENTIFIER
-         |       literal;
+                 IDENTIFIER:i {:parser.generar_write(i);:}
+         |       INTEGER_LITERAL:i {:parser.generar_write(i);:};
 
 // LLAMADO A FUNCION ********
 llamado_funcion             ::=
@@ -792,10 +928,55 @@ expresiones_state  ::=
           |       INTEGER_LITERAL:i                         {:parser.evaluar_while_unario(i,"n");:}
                 ;                          
                         
-                                              
+ expresiones_state_if  ::=
+                  INTEGER_LITERAL:i EQEQ:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i EQEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      EQEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      EQEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i LTEQ:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i LTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      LTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      LTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i GTEQ:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i GTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      GTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      GTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i NOTEQ:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i NOTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      NOTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      NOTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i ANDAND:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i ANDAND:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      ANDAND:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      ANDAND:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i OROR:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i OROR:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      OROR:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      OROR:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i GT:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i GT:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      GT:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      GT:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i LT:o INTEGER_LITERAL:e {:parser.evaluar_if(i,o,e);:}
+          |       INTEGER_LITERAL:i LT:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_if(i,o,e);:} 
+          |       IDENTIFIER:i      LT:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_if(i,o,e);:}
+          |       IDENTIFIER:i      LT:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_if_doble_identi(i,o,e);:}
+                 
+          |       NOT:o IDENTIFIER:i                          {:parser.revisar_identi(i);parser.evaluar_if_unario(i,o);:}
+          |       NOT:o INTEGER_LITERAL:i                     {:parser.evaluar_if_unario(i,o);:}
+          
+          |       IDENTIFIER:i                              {:parser.revisar_identi(i);parser.evaluar_if_unario(i,"n");:}
+          |       INTEGER_LITERAL:i                         {:parser.evaluar_if_unario(i,"n");:}
+                ;                                              
                                  			   
                                                    
- // terminal NOT; //"!" 
 
 // ********** VACIO
 epsilon ::= /*nothing */;
