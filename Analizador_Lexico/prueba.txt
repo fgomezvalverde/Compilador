@@ -1,12 +1,14 @@
 int as;
 int asd=1;
 int s,r,t;
-void mains() {
-while(true){} 
+int mains() {
+while(1){} 
 a= a*e; 
+return as;
 }  
 
 void main(){
-	while(asd){}
+	mains();
+	while(asd != s){}
 
 }

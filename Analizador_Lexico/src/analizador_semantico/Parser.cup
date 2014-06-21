@@ -22,7 +22,7 @@ parser code  {:
   public static ArrayList<String> funciones = new ArrayList<String>();
   public static Pila pila = new Pila();
   public String MAIN = "";
-  public String FUNCIONES= "";
+  public String FUNCIONES= "datos endS\n\ncodigo segment\n\tASSUME CS:Codigo, DS:Datos, SS:Pila\n\n";
   public int cont_while=1;
   public int cont_if=1;
   public int cont_else=1;
@@ -161,7 +161,13 @@ public void funcion_Insertar(Object nombre)
         FUNCIONES += nombre.toString()+" endP\n\n";
     }
 }
+public void generar_llamado_funcion(Object obj)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp +="\tcall "+obj.toString()+"\n";
+    pila.Push(new Funcion(temp));
 
+}
 public void revisar_Main()
 {
     if(!funciones.contains("main"))
@@ -181,7 +187,12 @@ public void revisar_Return()
         esReturn = false;
     }
 }
-
+public void generar_Return(Object obj)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tmov ax,"+obj.toString()+"\n";
+    pila.Push(new Funcion(temp));
+}
 // WHILE
 
 public void iniciar_while()
@@ -190,46 +201,112 @@ public void iniciar_while()
     temp += "start_while"+cont_while+":\n";
     pila.Push(new Funcion(temp));
 }
-public void evaluar_while()
+public void evaluar_while(Object pri,Object oper,Object seg)
 {
-    String oper="<=";
-    String temp = ((Funcion)pila.Pop()).valor();
-    temp += "\tCMP OBJ1,OBJ2\n";
     
-    if(oper.equals("<=")){
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tCMP "+pri.toString()+","+seg.toString()+"\n";
+    
+    if(oper.toString().equals("<=")){
         temp+= "\tJLE end_while"+cont_while+"\n";
     }
-    else if(oper.equals("=<")){
+    else if(oper.toString().equals("=<")){
         temp+= "\tJGE end_while"+cont_while+"\n";    
     }
-    else if(oper.equals("!=")){
+    else if(oper.toString().equals("!=")){
         temp+= "\tJNE end_while"+cont_while+"\n";    
     }
-    else if(oper.equals("==")){
+    else if(oper.toString().equals("==")){
         temp+= "\tJE end_while"+cont_while+"\n";    
     }
-    else if(oper.equals("<")){
+    else if(oper.toString().equals("<")){
         temp+= "\tJL end_while"+cont_while+"\n";    
     }
-    else if(oper.equals(">")){
+    else if(oper.toString().equals(">")){
         temp+= "\tJG end_while"+cont_while+"\n";    
     }
-    else if(oper.equals("||")){
-        temp+= "\tNULL end_while"+cont_while+"\n";    
+    else if(oper.toString().equals("||")){
+        temp+= "\tJE end_while"+cont_while+"\n";    
     }
-    else if(oper.equals("&&")){
-        temp+= "\tNULL end_while"+cont_while+"\n";    
+    else if(oper.toString().equals("&&")){
+        temp+= "\tJNE end_while"+cont_while+"\n";    
     }
     pila.Push(new Funcion(temp));
 }
+public void evaluar_while_doble_identi(Object pri,Object oper,Object seg)
+{
+    
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tmov ax,"+seg.toString()+"\n";
+    temp += "\tCMP "+pri.toString()+",ax\n";
+    
+    if(oper.toString().equals("<=")){
+        temp+= "\tJLE end_while"+cont_while+"\n";
+    }
+    else if(oper.toString().equals("=<")){
+        temp+= "\tJGE end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals("!=")){
+        temp+= "\tJNE end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals("==")){
+        temp+= "\tJE end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals("<")){
+        temp+= "\tJL end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals(">")){
+        temp+= "\tJG end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals("||")){
+        temp+= "\tJE end_while"+cont_while+"\n";    
+    }
+    else if(oper.toString().equals("&&")){
+        temp+= "\tJNE end_while"+cont_while+"\n";    
+    }
+    pila.Push(new Funcion(temp));
+}
+
+public void evaluar_while_unario(Object pri,Object oper)
+{
+    String temp = ((Funcion)pila.Pop()).valor();
+    temp += "\tCMP "+pri.toString()+",1\n";
+    
+    if(oper.toString().equals("!")){
+
+        temp+= "\tJNE end_while"+cont_while+"\n";
+    }
+    else{
+        temp+= "\tJE end_while"+cont_while+"\n";
+    }
+    pila.Push(new Funcion(temp));
+}
+
 public void terminar_while()
 {
     String temp = ((Funcion)pila.Pop()).valor();
-    temp +="\tJUMP start_while"+cont_while+"\n";
+    temp +="\tJMP start_while"+cont_while+"\n";
     temp +="end_while"+cont_while+":\n";
     cont_while++;
     pila.Push(new Funcion(temp));
 }
+
+public void revisar_identi(Object pidenti)
+{
+    if(!identis.contains(pidenti.toString()))
+    {
+        System.err.println("ERROR SEMANTICO: Identificador => "+pidenti.toString()+" nunca declarado" );
+    }
+}
+
+public void revisar_funcion(Object obj)
+{
+    if(!funciones.contains(obj.toString()))
+    {
+        System.err.println("ERROR SEMANTICO: Funcion => "+obj.toString()+" nunca declarada" );
+    }
+}
+
 :};
 
 action code {:
@@ -391,6 +468,8 @@ non terminal String expresion_aritmetica_unaria;
 non terminal String expresion_aritmetica_binaria;
 non terminal String expresion_booleana;
 
+non terminal String expresiones_state;  // AYUDA CON EXPRESIONES DE WHILE NUEVO
+
 
 // OPERADORES
 non terminal String operadores_unarios;
@@ -429,8 +508,8 @@ estructura ::=
 
 // PARTE DE GLOBALES
 statement_globales ::= 
-                declaracion_identificador statement_globales {:RESULT += "datos endS\n\ncodigo segment\n\tASSUME CS:Codigo, DS:Datos, SS:Pila\n\n";:}
-        |        declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
+                declaracion_identificador statement_globales 
+        |       declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
 
 // DECLARACION VARIABLES *******************
 declaracion_identificador ::=
@@ -472,7 +551,8 @@ cuerpo_funcion_aux          ::=
         |       expresiones cuerpo_funcion_aux
         |       statement_if cuerpo_funcion_aux
         |       statement_while cuerpo_funcion_aux
-        |       RETURN literal_numerico  SEMICOLON RBRACE {:parser.esReturn=false;parser.cont_bucles=0;:}
+        |       RETURN IDENTIFIER:i  SEMICOLON RBRACE {:parser.revisar_identi(i);parser.esReturn=false;parser.cont_bucles=0;parser.generar_Return(i);:}
+        |       RETURN INTEGER_LITERAL:i  SEMICOLON RBRACE {:parser.esReturn=false;parser.cont_bucles=0;parser.generar_Return(i);:}
         |       RBRACE {:parser.revisar_Return();:};     // SE TERMINA LA FUNCION    
 
 
@@ -489,7 +569,7 @@ statement_else ::=
 // WHILE
 
 statement_while ::=
-                WHILE {:parser.cont_bucles++;parser.iniciar_while();:} LPAREN expresiones_statement {:parser.evaluar_while();:} RPAREN LBRACE cuerpo_funcion_aux {:parser.terminar_while();:}
+                WHILE {:parser.cont_bucles++;parser.iniciar_while();:} LPAREN expresiones_state RPAREN LBRACE cuerpo_funcion_aux {:parser.terminar_while();:}
         |       WHILE error:e{:parser.report_error("Error Sintactico: Statement en WHILE",e);:} RBRACE ;
 // FOR
 
@@ -623,8 +703,7 @@ estructura_write_parametros_aux   ::=
 
 // LLAMADO A FUNCION ********
 llamado_funcion             ::=
-                IDENTIFIER LPAREN  RPAREN SEMICOLON
-        |       IDENTIFIER LPAREN  estructura_write_parametros_aux RPAREN SEMICOLON
+                IDENTIFIER:i LPAREN  RPAREN SEMICOLON {:parser.revisar_funcion(i);parser.generar_llamado_funcion(i);:}
         |       IDENTIFIER error:e{:parser.report_error("Error Sintactico: LLAMADO DE FUNCION",e);:} SEMICOLON ;
                
 
@@ -663,6 +742,61 @@ expresion_booleana ::=
                   expresion_aritmetica operadores_booleanos expresion_aritmetica
           |       NOT expresion_aritmetica
           |       LPAREN expresion_booleana RPAREN;
+
+
+expresiones_state  ::=
+                  INTEGER_LITERAL:i EQEQ:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i EQEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      EQEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      EQEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i LTEQ:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i LTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      LTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      LTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i GTEQ:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i GTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      GTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      GTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i NOTEQ:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i NOTEQ:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      NOTEQ:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      NOTEQ:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i ANDAND:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i ANDAND:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      ANDAND:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      ANDAND:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i OROR:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i OROR:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      OROR:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      OROR:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i GT:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i GT:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      GT:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      GT:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+
+          |       INTEGER_LITERAL:i LT:o INTEGER_LITERAL:e {:parser.evaluar_while(i,o,e);:}
+          |       INTEGER_LITERAL:i LT:o IDENTIFIER:e      {:parser.revisar_identi(e);parser.evaluar_while(i,o,e);:} 
+          |       IDENTIFIER:i      LT:o INTEGER_LITERAL:e {:parser.revisar_identi(i);parser.evaluar_while(i,o,e);:}
+          |       IDENTIFIER:i      LT:o IDENTIFIER:e      {:parser.revisar_identi(i);parser.revisar_identi(e);parser.evaluar_while_doble_identi(i,o,e);:}
+                 
+          |       NOT:o IDENTIFIER:i                          {:parser.revisar_identi(i);parser.evaluar_while_unario(i,o);:}
+          |       NOT:o INTEGER_LITERAL:i                     {:parser.evaluar_while_unario(i,o);:}
+          
+          |       IDENTIFIER:i                              {:parser.revisar_identi(i);parser.evaluar_while_unario(i,"n");:}
+          |       INTEGER_LITERAL:i                         {:parser.evaluar_while_unario(i,"n");:}
+                ;                          
+                        
+                                              
+                                 			   
+                                                   
+ // terminal NOT; //"!" 
+
 // ********** VACIO
 epsilon ::= /*nothing */;
         

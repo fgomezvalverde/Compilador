@@ -46,6 +46,13 @@ public class Main {
         p.parse();
         System.out.println(p.RESULT);
 
+        
+        /*datos endS
+            codigo segment
+		ASSUME CS:Codigo, DS:Datos, SS:Pila
+        
+*/
+        
         /*Main m = new Main();
         m.runScanner("prueba.txt");*/
         
