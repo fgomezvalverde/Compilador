@@ -1,5 +1,6 @@
-int a, b, c;
-c = 10 + a;
+int x,y,z;
+x = x == z;
+z = x >= y;
 
 void main(){
     

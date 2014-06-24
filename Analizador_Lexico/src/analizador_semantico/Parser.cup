@@ -31,6 +31,10 @@ parser code  {:
   public int cont_bucles =0;
   public boolean esReturn=false;
 
+  private int label_n = 0;
+
+  public String RESULT2 = "";
+
 
   public static void main(String argv[]) {
 
@@ -174,21 +178,71 @@ IData Operador = pila.Pop();
 IData OperandoIzquierdo = pila.Pop();
 
 //Evaluar Tipo - No hayb que evaluar 
-/**
+
+generar_expresion_binaria(OperandoDerecho, Operador, OperandoIzquierdo);
+
+pila.Push(new Identificador("resultado", -1));
+
+}
+
+public void  generar_expresion_binaria(IData OperandoDerecho, IData Operador, IData OperandoIzquierdo){
+
+   String etiqueta = "L" + label_n;
+
    switch(Operador.valor()){
-      case "+": break;
-      case "-": break;
-      case "==": break;
-      case ">=": break;
-      case ">": break;
-      case "<=": break;
-      case "<": break;
-      case "!=": break;
+      case "+": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
+                                    "\nadd ax, " + OperandoIzquierdo.valor();
+                break;
+      case "-": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() +
+                                    "\nsub ax, " + OperandoIzquierdo.valor();
+                break;
+      case "=": RESULT2 = RESULT2 + "\nmov "  + OperandoIzquierdo.valor() +  ", ax";
+                break;
+
+      case "==":RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
+                                    "\ncmp ax, "  + OperandoIzquierdo.valor() + 
+                                    "\njnz "  + etiqueta +
+                                    "\nmov al, 1"  +                 
+                                    "\n" + etiqueta + ":  mov al, 0";    
+                break;
+
+      case ">=":RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+                                    "\njge "  + etiqueta + 
+                                    "\nmov bl, 0"  +     
+                                    "\n" + etiqueta+ ":  mov bl, 1";    
+                 break;
+      case ">": RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+                                    "\njg "  + etiqueta + 
+                                    "\nmov bl, 0"  +     
+                                    "\n" + etiqueta + ":  mov bl, 1";  
+                 break;
+      case "<=":RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+                                    "\njge "  + etiqueta + 
+                                    "\nmov bl, 0"  +     
+                                    "\n" + etiqueta + ":  mov bl, 1";  
+                  break;
+      case "<": RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+                                    "\njl "  + etiqueta + 
+                                    "\nmov bl, 0"  +     
+                                    "\n" + etiqueta + ":  mov bl, 1";  
+                 break;
+
+      case "!=": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
+                                    "\ncmp ax, "  + OperandoIzquierdo.valor() + 
+                                    "\njnz "  + etiqueta +
+                                    "\nmov al, 0"  +                 
+                                    "\n" + etiqueta + ":  mov al, 1"; 
+                 break;
       case "||": break;
       case "&&":break;
       default: System.err.println("ERROR SEMANTICO: operador "+ Operador.valor()+" requiere solo un operando"); break;
-   }*/
-
+   }
+      label_n++;
+   
 }
 
 public void eval_unary(){}
@@ -726,7 +780,7 @@ varios_identificadores    ::=
 
 valor_inicial             ::=
                 epsilon {:parser.valor_id(null);:}
-        |       EQ literal_numerico;
+        |       EQ expresiones_statement; // antes tenia literal_numerico
 
 // PARTE DE FUNCIONES 
 statement_funciones  ::=
@@ -844,14 +898,14 @@ operadores_asignacion ::=
 
 
 operadores_booleanos ::= 
-                OROR
-        |       ANDAND
-        |       EQEQ
-        |       GTEQ
-        |       GT
-        |       LTEQ
-        |       LT
-        |       NOTEQ;   
+                OROR:o {:parser.operador(o);:}
+        |       ANDAND:o {:parser.operador(o);:}
+        |       EQEQ:o {:parser.operador(o);:}
+        |       GTEQ:o {:parser.operador(o);:}
+        |       GT:o {:parser.operador(o);:}
+        |       LTEQ:o {:parser.operador(o);:}
+        |       LT:o {:parser.operador(o);:}
+        |       NOTEQ:o {:parser.operador(o);:};   
 
 // LITERALES *************************
 
@@ -922,7 +976,7 @@ expresiones_statement ::=
         |       expresion_booleana ;
 
 asignacion ::= 
-                IDENTIFIER:i operadores_asignacion expresion_aritmetica {:parser.identificador(i);:};   
+                IDENTIFIER:i {:parser.identificador(i);:} operadores_asignacion expresiones_statement {:parser.evaluar_binario();:};   
 
 
 expresion_aritmetica ::= 
@@ -943,7 +997,7 @@ expresion_aritmetica_binaria ::=
         
 
 expresion_booleana ::= 
-                  expresion_aritmetica operadores_booleanos expresion_aritmetica
+                  expresion_aritmetica operadores_booleanos expresion_aritmetica {:parser.evaluar_binario();:}
           |       NOT expresion_aritmetica
           |       LPAREN expresion_booleana RPAREN;
 

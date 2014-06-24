@@ -50,6 +50,9 @@ public class Main {
         Scanner lexer = new Scanner (reader);
 	Parser p = new Parser(lexer);
         p.parse();
+        
+        //System.out.println(p.RESULT);
+       System.out.println(p.RESULT2);
     
     }
     
@@ -57,11 +60,13 @@ public class Main {
         
         //generarScanner();
         //generarParser();
-           runParser();
+       runParser();
+       
+  
     
         
        
-        //System.out.println(p.RESULT);
+        
         
         /**
         try {
