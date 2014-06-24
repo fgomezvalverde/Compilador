@@ -1089,7 +1089,7 @@ public void generar_write(Object obj)
 
 }
 
-/** Cup generated class to encapsulate user supplied action code.*/
+/** Cup generated class  to encapsulate user supplied action code.*/
 class CUP$Parser$actions {
 
 

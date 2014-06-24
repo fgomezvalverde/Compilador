@@ -36,17 +36,19 @@ public class Main {
         /*File file=new File("src/analizador_lexico/Lexer.flex");
         JFlex.Main.generate(file);*/
         
-        /*String[] argumentos = {"-interface", "-destdir", "src", 
+        String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
-        java_cup.Main.main(argumentos);*/
-        
-        String nombre_Archivo = "prueba";
+        java_cup.Main.main(argumentos);
+   /*     
+        String nombre_Archivo = "prueba2";
         Reader reader  = new BufferedReader(new FileReader(nombre_Archivo+".c"));
         //runScanner(nombre_Archivo);
         Scanner lexer = new Scanner (reader);
 	Parser p = new Parser(lexer);
         p.parse();
         System.out.println(p.RESULT);
+        */
+        /**
         try {
 			File file = new File("C:\\tasm\\"+nombre_Archivo+".asm");
  
@@ -65,7 +67,7 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-        
+        */
         /*datos endS
             codigo segment
 		ASSUME CS:Codigo, DS:Datos, SS:Pila

@@ -17,7 +17,7 @@ parser code  {:
   public static int warnings = 0;
   public static analizador_lexico.Scanner s;
   public static ArrayList<Token> tokens = new ArrayList<Token>();
-    public static ArrayList<String> identis = new ArrayList<String>();
+  public static ArrayList<String> identis = new ArrayList<String>();
   public String RESULT= "Pila SEGMENT STACK\n\tdb 64 dup (?)\nPila ENDS\n\ndatos segment\n";
   public static ArrayList<String> funciones = new ArrayList<String>();
   public static Pila pila = new Pila();
@@ -49,7 +49,7 @@ parser code  {:
       }
     }
   }
-    protected int error_sync_size () {
+  protected int error_sync_size () {
         //System.out.println(":error_sync_size was called.");
         return 1; // not recommended by the CUP manual
 }
@@ -98,6 +98,7 @@ public void valor_id(Object valor)
     }
 }
 
+
 public void inserta_TS()
 {
     IData temp;
@@ -126,6 +127,75 @@ public void inserta_TS()
         }
     }
 }
+
+//EXPRESIONES ------------------------------------------------------------------------------------
+public void identificador(Object id)
+{
+   Identificador temp = new Identificador(id.toString(),-1);
+
+   if(verificar_TS(temp)){
+         pila.Push(temp);
+     }
+
+   else{System.err.println("ERROR SEMANTICO: variable "+ temp.valor()+" no declarada");}
+
+}
+
+public boolean verificar_TS(Identificador variable){
+
+          if(identis.contains(variable.valor())){
+            return true;
+        }
+        else{
+            return false;
+        }
+
+}
+
+public void literal(Object valor){
+
+    if(valor!= null){
+        Literal temp = new Literal(valor.toString());
+        pila.Push(temp);
+    }
+    else{
+        Literal temp = new Literal("0");
+        pila.Push(temp);}
+}
+
+public void operador(Object operator){
+
+      Operador temp = new Operador(operator.toString());
+      pila.Push(temp);
+}
+
+public void eval_binary(){
+
+IData OperandoDerecho = pila.Pop();
+IData Operador = pila.Pop();
+IData OperandoIzquierdo = pila.Pop();
+
+//Evaluar Tipo - No hayb que evaluar 
+
+   switch(Operador.valor()){
+      case "+": break;
+      case "-": break;
+      case "==": break;
+      case ">=": break;
+      case ">": break;
+      case "<=": break;
+      case "<": break;
+      case "!=": break;
+      case "||": break;
+      case "&&":break;
+      default: System.err.println("ERROR SEMANTICO: operador "+ Operador.valor()+" requiere solo un operando"); break;
+   }
+
+}
+
+public void eval_unary(){}
+//------------------------------------------------------------------------------
+//..............................................................................
 
 // FUNCIONES
 public void crear_slot_funcion()
