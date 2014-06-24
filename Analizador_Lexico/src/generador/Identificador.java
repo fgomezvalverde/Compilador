@@ -12,8 +12,8 @@ package generador;
  */
 public class Identificador implements IData{
     
-    String nombre;
-    String valor = "0";
+    String nombre; // Nombre de la variable
+    String valor = "0"; // Valor que almacena, solo almacena int
     int linea;
     public Identificador(String dato,int plinea)
     {

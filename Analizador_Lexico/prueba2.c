@@ -1,6 +1,6 @@
-int a;
+int a, b, c;
+c = 10 + a;
 
 void main(){
-	
-	a = b + 4;
+    
 }

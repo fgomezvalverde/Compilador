@@ -28,26 +28,41 @@ import java_cup.runtime.Symbol;
  */
 public class Main {
 
-    /**
-     * @param args the command line arguments
-     * @throws java.io.FileNotFoundException
-     */
-    public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
-        /*File file=new File("src/analizador_lexico/Lexer.flex");
-        JFlex.Main.generate(file);*/
+    
+    public static void generarScanner(){
+        
+        File file=new File("src/analizador_lexico/Lexer.flex");
+        JFlex.Main.generate(file);
+    }
+    
+    public static void generarParser() throws IOException, Exception{
         
         String[] argumentos = {"-interface", "-destdir", "src", 
                 "-parser", "Parser", "src/analizador_semantico/Parser.cup"};
         java_cup.Main.main(argumentos);
-   /*     
+    }
+    
+    public static void runParser() throws FileNotFoundException, Exception{
+        
         String nombre_Archivo = "prueba2";
         Reader reader  = new BufferedReader(new FileReader(nombre_Archivo+".c"));
         //runScanner(nombre_Archivo);
         Scanner lexer = new Scanner (reader);
 	Parser p = new Parser(lexer);
         p.parse();
-        System.out.println(p.RESULT);
-        */
+    
+    }
+    
+    public static void main(String args[]) throws FileNotFoundException, IOException, Exception {
+        
+        //generarScanner();
+        //generarParser();
+           runParser();
+    
+        
+       
+        //System.out.println(p.RESULT);
+        
         /**
         try {
 			File file = new File("C:\\tasm\\"+nombre_Archivo+".asm");

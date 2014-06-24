@@ -21,7 +21,7 @@ public class Operador implements IData{
 
     @Override
     public String CodigoGenerar() {
-        throw new UnsupportedOperationException("Not supported yet."); 
+         return valor+"\n";
     }
 
     @Override

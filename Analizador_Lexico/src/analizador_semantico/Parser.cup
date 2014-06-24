@@ -129,29 +129,26 @@ public void inserta_TS()
 }
 
 //EXPRESIONES ------------------------------------------------------------------------------------
+//Crea un registro Identificador y lo guarda en la pila
 public void identificador(Object id)
 {
    Identificador temp = new Identificador(id.toString(),-1);
 
-   if(verificar_TS(temp)){
-         pila.Push(temp);
-     }
-
+   if(verificar_TS(temp)){pila.Push(temp);}
    else{System.err.println("ERROR SEMANTICO: variable "+ temp.valor()+" no declarada");}
-
 }
 
+//Verifica si ya el id esta en la tabla de simbolos
 public boolean verificar_TS(Identificador variable){
 
-          if(identis.contains(variable.valor())){
+        if(identis.contains(variable.valor())){
             return true;
         }
         else{
             return false;
         }
-
 }
-
+//Crea un registro Literal y lo mete a la pila
 public void literal(Object valor){
 
     if(valor!= null){
@@ -163,20 +160,21 @@ public void literal(Object valor){
         pila.Push(temp);}
 }
 
+//Crea un registro operador y lo mete a la pila
 public void operador(Object operator){
 
       Operador temp = new Operador(operator.toString());
       pila.Push(temp);
 }
 
-public void eval_binary(){
+public void evaluar_binario(){
 
 IData OperandoDerecho = pila.Pop();
 IData Operador = pila.Pop();
 IData OperandoIzquierdo = pila.Pop();
 
 //Evaluar Tipo - No hayb que evaluar 
-
+/**
    switch(Operador.valor()){
       case "+": break;
       case "-": break;
@@ -189,13 +187,12 @@ IData OperandoIzquierdo = pila.Pop();
       case "||": break;
       case "&&":break;
       default: System.err.println("ERROR SEMANTICO: operador "+ Operador.valor()+" requiere solo un operando"); break;
-   }
+   }*/
 
 }
 
 public void eval_unary(){}
-//------------------------------------------------------------------------------
-//..............................................................................
+
 
 // FUNCIONES
 public void crear_slot_funcion()
@@ -714,7 +711,8 @@ estructura ::=
 
 // PARTE DE GLOBALES
 statement_globales ::= 
-                declaracion_identificador statement_globales 
+                declaracion_identificador statement_globales
+        |       asignacion SEMICOLON statement_globales 
         |       declaracion_funciones statement_funciones;              // TIENE QUE HABER UNA FUNCION **** LLAMADO A FUNCIONES
 
 // DECLARACION VARIABLES *******************
@@ -831,18 +829,18 @@ operadores_unarios ::=
 
 
 operadores_binarios ::=
-                PLUS
-        |       MINUS
-        |       MULT
-        |       DIV
-        |       MOD;
+                PLUS:o {:parser.operador(o);:}
+        |       MINUS:o {:parser.operador(o);:}
+        |       MULT:o {:parser.operador(o);:}
+        |       DIV:o {:parser.operador(o);:}
+        |       MOD:o {:parser.operador(o);:};
 
 operadores_asignacion ::= 
-                EQ
-        |       PLUS_EQ
-        |       MINUS_EQ
-        |       MULT_EQ
-        |       DIV_EQ;   
+                EQ:o {:parser.operador(o);:}
+        |       PLUS_EQ:o {:parser.operador(o);:}
+        |       MINUS_EQ:o {:parser.operador(o);:}
+        |       MULT_EQ:o {:parser.operador(o);:}
+        |       DIV_EQ:o {:parser.operador(o);:};   
 
 
 operadores_booleanos ::= 
@@ -924,15 +922,15 @@ expresiones_statement ::=
         |       expresion_booleana ;
 
 asignacion ::= 
-                IDENTIFIER operadores_asignacion expresion_aritmetica ;      
+                IDENTIFIER:i operadores_asignacion expresion_aritmetica {:parser.identificador(i);:};   
 
 
 expresion_aritmetica ::= 
                  expresion_aritmetica_unaria
         |        expresion_aritmetica_binaria
         |        LPAREN expresion_aritmetica RPAREN
-        |        IDENTIFIER 
-        |        literal;
+        |        IDENTIFIER:i {:parser.identificador(i);:}
+        |        literal_numerico; //antes tenia solo literal
 
 expresion_aritmetica_unaria ::= 
                  operadores_unarios IDENTIFIER 
@@ -941,7 +939,7 @@ expresion_aritmetica_unaria ::=
         |        MINUS IDENTIFIER;
 
 expresion_aritmetica_binaria ::= 
-                 expresion_aritmetica operadores_binarios expresion_aritmetica;
+                 expresion_aritmetica operadores_binarios expresion_aritmetica {:parser.evaluar_binario();:};
         
 
 expresion_booleana ::= 
