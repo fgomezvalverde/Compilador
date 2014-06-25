@@ -1,7 +1,9 @@
-int x,y,z;
-x = x == z;
-z = x >= y;
+int a = 1;
+int x;
+x = a++;
+//x = ++a; 
 
 void main(){
-    
+ 
+
 }

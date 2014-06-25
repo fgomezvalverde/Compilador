@@ -177,7 +177,7 @@ IData OperandoDerecho = pila.Pop();
 IData Operador = pila.Pop();
 IData OperandoIzquierdo = pila.Pop();
 
-//Evaluar Tipo - No hayb que evaluar 
+//Evaluar Tipo - No hay que evaluar 
 
 generar_expresion_binaria(OperandoDerecho, Operador, OperandoIzquierdo);
 
@@ -190,62 +190,115 @@ public void  generar_expresion_binaria(IData OperandoDerecho, IData Operador, ID
    String etiqueta = "L" + label_n;
 
    switch(Operador.valor()){
-      case "+": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
-                                    "\nadd ax, " + OperandoIzquierdo.valor();
+      case "+": RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() + 
+                                    "\nadd al, " + OperandoIzquierdo.valor();
                 break;
-      case "-": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() +
-                                    "\nsub ax, " + OperandoIzquierdo.valor();
+      case "-": RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() +
+                                    "\nsub al, " + OperandoIzquierdo.valor();
                 break;
       case "=": RESULT2 = RESULT2 + "\nmov "  + OperandoIzquierdo.valor() +  ", ax";
                 break;
 
-      case "==":RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
-                                    "\ncmp ax, "  + OperandoIzquierdo.valor() + 
+      case "==":RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() + 
+                                    "\ncmp al, "  + OperandoIzquierdo.valor() + 
                                     "\njnz "  + etiqueta +
                                     "\nmov al, 1"  +                 
                                     "\n" + etiqueta + ":  mov al, 0";    
                 break;
 
-      case ">=":RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
-                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+      case ">=":RESULT2 = RESULT2 + "\nmov bl, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bl, "  + OperandoIzquierdo.valor() + 
                                     "\njge "  + etiqueta + 
                                     "\nmov bl, 0"  +     
                                     "\n" + etiqueta+ ":  mov bl, 1";    
                  break;
-      case ">": RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
-                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+      case ">": RESULT2 = RESULT2 + "\nmov bl, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bl, "  + OperandoIzquierdo.valor() + 
                                     "\njg "  + etiqueta + 
                                     "\nmov bl, 0"  +     
                                     "\n" + etiqueta + ":  mov bl, 1";  
                  break;
-      case "<=":RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
-                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+      case "<=":RESULT2 = RESULT2 + "\nmov bl, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp bl, "  + OperandoIzquierdo.valor() + 
                                     "\njge "  + etiqueta + 
                                     "\nmov bl, 0"  +     
                                     "\n" + etiqueta + ":  mov bl, 1";  
                   break;
-      case "<": RESULT2 = RESULT2 + "\nmov bx, "  + OperandoIzquierdo.valor() + 
-                                    "\ncmp bx, "  + OperandoIzquierdo.valor() + 
+      case "<":RESULT2 = RESULT2 +  "\nmov bl, "  + OperandoIzquierdo.valor() + 
+                                    "\ncmp b, "  + OperandoIzquierdo.valor() + 
                                     "\njl "  + etiqueta + 
                                     "\nmov bl, 0"  +     
                                     "\n" + etiqueta + ":  mov bl, 1";  
                  break;
 
-      case "!=": RESULT2 = RESULT2 + "\nmov ax, "  + OperandoDerecho.valor() + 
-                                    "\ncmp ax, "  + OperandoIzquierdo.valor() + 
+      case "!=":RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() + 
+                                    "\ncmp al, "  + OperandoIzquierdo.valor() + 
                                     "\njnz "  + etiqueta +
                                     "\nmov al, 0"  +                 
                                     "\n" + etiqueta + ":  mov al, 1"; 
                  break;
-      case "||": break;
-      case "&&":break;
+
+      case "||":RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() + 
+                                    "\nmov bl, "  + OperandoIzquierdo.valor() +
+                                    "\nor ax,bx"; 
+                 break;
+
+      case "&&":RESULT2 = RESULT2 + "\nmov al, "  + OperandoDerecho.valor() + 
+                                    "\nmov bl, "  + OperandoIzquierdo.valor() +
+                                    "\nand al,bl"; 
+                 break;
       default: System.err.println("ERROR SEMANTICO: operador "+ Operador.valor()+" requiere solo un operando"); break;
    }
       label_n++;
    
 }
 
-public void eval_unary(){}
+public void evaluar_unario_postfija(){
+
+         IData Operador = pila.Pop();
+         IData Operando = pila.Pop();
+
+         generar_expresion_unaria(Operador, Operando);
+
+         pila.Push(new Identificador("resultado", -1));
+
+}
+
+public void evaluar_unario_prefija(){
+
+         IData Operando = pila.Pop();
+         IData Operador = pila.Pop();
+
+         generar_expresion_unaria(Operador, Operando);
+
+         pila.Push(new Identificador("resultado", -1));
+
+}
+
+public void generar_expresion_unaria(IData Operador, IData Operando){
+
+
+   switch(Operador.valor()){
+      case "++": RESULT2 = RESULT2 + "\nmov al, "  + Operando.valor() + 
+                                     "\ninc al, " + 
+                                     "\nmov " + Operando.valor() + ", al";
+                break;
+
+      case "--": RESULT2 = RESULT2 = RESULT2 + "\nmov al, "  + Operando.valor() + 
+                                     "\ndec al, " + 
+                                     "\nmov " + Operando.valor()+ ", al";
+                break;
+
+      case "!": RESULT2 = RESULT2 + "\nmov al, " + Operando.valor() +
+                                    "\nxor al, 1";
+
+                break;
+
+      default: System.err.println("ERROR SEMANTICO: operador "+ Operador.valor()+" requiere dos operandos"); break;
+   }
+      label_n++;
+
+}
 
 
 // FUNCIONES
@@ -878,8 +931,8 @@ statement_variables_locales ::=
 // OPERADPRES *********************
 
 operadores_unarios ::=
-                PLUS_PLUS
-        |       MINUS_MINUS;
+                PLUS_PLUS:o{:parser.operador(o);:}
+        |       MINUS_MINUS:o{:parser.operador(o);:};
 
 
 operadores_binarios ::=
@@ -935,8 +988,6 @@ type	::=
         |       SHORT;
 
 
-
-
 // READ AND WRITE **************
 
 estructura_read    ::=
@@ -987,8 +1038,8 @@ expresion_aritmetica ::=
         |        literal_numerico; //antes tenia solo literal
 
 expresion_aritmetica_unaria ::= 
-                 operadores_unarios IDENTIFIER 
-        |        IDENTIFIER operadores_unarios 
+                 operadores_unarios IDENTIFIER:i {:parser.identificador(i);:}{:parser.evaluar_unario_prefija();:}
+        |        IDENTIFIER:i {:parser.identificador(i);:} operadores_unarios {:parser.evaluar_unario_postfija();:}
         |        MINUS literal_numerico
         |        MINUS IDENTIFIER;
 
@@ -998,7 +1049,7 @@ expresion_aritmetica_binaria ::=
 
 expresion_booleana ::= 
                   expresion_aritmetica operadores_booleanos expresion_aritmetica {:parser.evaluar_binario();:}
-          |       NOT expresion_aritmetica
+          |       NOT:o {:parser.operador(o);:} expresion_aritmetica {:parser.evaluar_unario_postfija();:}
           |       LPAREN expresion_booleana RPAREN;
 
 
